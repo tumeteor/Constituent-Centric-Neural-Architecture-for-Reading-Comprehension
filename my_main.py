@@ -50,9 +50,12 @@ def train(restore=False):
     np.random.seed(42)
     train=data['train']
     logging.warn('the length of train data:{}'.format(len(train)))
+    print("buid model")
     model=ccrc_model.ccrc_model(config)
+    print("done")
     init=tf.global_variables_initializer()
     saver = tf.train.Saver()
+    print("start training")
     with tf.Session() as sess:
         sess.run(init)
         start_time=time.time()

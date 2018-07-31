@@ -210,7 +210,6 @@ class bottom_up_lstm(object):
         self.n_inodes = self.n_inodes//2
         self.num_leaves = tf.reduce_sum(tf.to_int32(tf.not_equal(self.input,-1)),[0])
     def add_embedding(self):
-        #璁剧疆涓篻love鐨別mbedding
         #embed=np.load('glove{0}_uniform.npy'.format(self.emb_dim))
         with tf.variable_scope("Embed",regularizer=None):
             #embedding=tf.get_variable('embedding',[self.num_emb,self.emb_dim],initializer=self.emb_mat, trainable=False)

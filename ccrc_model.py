@@ -9,7 +9,7 @@ from tensorflow.contrib import seq2seq
 from tensorflow.contrib import legacy_seq2seq
 from question_encoding import *
 from context_encoding import *
-from attention_layer import *
+#from attention_layer import *
 
 class ccrc_model(object):
     #Here I assume that 

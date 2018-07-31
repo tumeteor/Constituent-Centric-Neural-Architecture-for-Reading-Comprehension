@@ -20,10 +20,14 @@ def load_embedding():
         for line in tqdm(infile.readlines()):
             array=line.lstrip().rstrip().split(' ')
             vector=list(map(float,array[1:]))
-            embeddings.append(vector)
-            word=array[0]
-            word2idx[word]=len(embeddings)-1 
-            #word=array[0]
+            word = array[0]
+            
+            if word not in word2idx:
+              embeddings.append(vector)
+              word2idx[word]=len(embeddings)-1 
+              #word=array[0]
+    print(len(word2idx))
+    print(len(embeddings))
     return word2idx, embeddings
 def load_squad_data():
     args=get_args()
@@ -48,7 +52,7 @@ def load_squad_data():
     for i in range(len(train_data)):
         train_trees.append(get_tree(train_data[i][0]))
 
-        train_answer=get_word_idx(word_tokenize(train_data[i][1][0])) #consider that only one correct answer in train dataset
+        train_answer=get_word_idx(word_tokenize(train_data[i][1][0]), word2idx) #consider that only one correct answer in train dataset
 
         cur_context_trees=[]
         contexts=nltk.sent_tokenize(train_data[i][2])
@@ -64,6 +68,8 @@ def load_squad_data():
     #train_data[#][1] is the wordidx list of target answer
     #train_data[#][2] is the root list of the sentence
     data={'train':train_data,'dev':dev_data}
+    #print(len(word2idx))
+    #print(len(embedding))
     return data, word2idx, embedding
 
 def get_word_idx(word_list, word2idx):
@@ -75,14 +81,14 @@ def get_word_idx(word_list, word2idx):
             idx_list.append(word2idx[word.lower()])
         else:
             logging.warn('no wordidx for answer:{}'.format(word))
-            idx_list.append(word2idx['unknown'])
+            idx_list.append(word2idx['UNK'])
     return idx_list
 
 def get_args():
     parser=argparse.ArgumentParser()
-    source_dir='/home2/shr/data/nlp/squad'
+    source_dir='/home/tunguyen/CQA/SQuAD/raw'
     target_dir='data/squad'
-    glove_path='/home/shr/data/glove/glove.6B.300d.txt'
+    glove_path='/home/tunguyen/CQA/glove/glove.840B.300d.txt'
     parser.add_argument('-s','--source_dir',default=source_dir)
     parser.add_argument('-t','--target_dir',default=target_dir)
     parser.add_argument('-gs','--glove_path',default=glove_path)
@@ -149,7 +155,8 @@ class Args():
         os.path.join(lib_dir, 'stanford-parser/stanford-parser-3.5.1-models.jar')])
 
 def constituency_parse(sentence,cp='',tokenize=True):
-    args=Args()
+    classpath="/home/tunguyen/Constituent-LSTM/lib:/home/tunguyen/Constituent-LSTM/lib/stanford-parser/stanford-parser.jar:/home/tunguyen/Constituent-LSTM/lib/stanford-parser/stanford-parser-3.5.1-models.jar"
+    #args=Args()
     with open('tmp.txt','w+') as outfile:
         outfile.write(sentence)
     tokpath='tmp.tok'
@@ -157,7 +164,8 @@ def constituency_parse(sentence,cp='',tokenize=True):
     relpath='tmp.rel'
     #cmd=('java -cp {} DependencyParse -tokpath {} -parentpath {} -relpath {} -tokenize -  < {}'.format(args.classpath,tokpath,parentpath, relpath,'tmp.txt'))
     #os.system(cmd)
-    cmd=('java -cp {} ConstituencyParse -tokpath {} -parentpath {} -tokenize -  < {}'.format(args.classpath,tokpath,parentpath,'tmp.txt'))
+    cmd=('java -cp {} ConstituencyParse -tokpath {} -parentpath {} -tokenize -  < {}'.format(classpath,tokpath,parentpath,'tmp.txt'))
+    print(cmd)
     os.system(cmd)
 def parse_tree(sentence,parents):
     nodes = {}
@@ -283,7 +291,6 @@ def BFStree(root, word2idx=None):
     while queue:
         node=queue.popleft()
         if func(node):
-            print(node.word)
             if word2idx:
                 if word2idx.get(node.word):
                     node.word=word2idx[node.word]
