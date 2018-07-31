@@ -48,7 +48,7 @@ class ccrc_model(object):
         sentence_attentioned_hidden_states=tf.gather(self.att_layer.attentioned_hidden_states,0)
         candidates_representations=self.get_candidates_representations_in_sentence(sentence_candidate_answers, sentence_attentioned_hidden_states)
         candidates_representations=tf.expand_dims(candidates_representations, 0)
-        
+
         all_sentence_candidates_representations=tf.identity(candidates_representations)
         sentence_num=tf.gather(tf.shape(self.att_layer.attentioned_hidden_states),0)
         logging.warn('attentioned_hidden_states:{}'.format(self.att_layer.attentioned_hidden_states))
@@ -63,10 +63,10 @@ class ccrc_model(object):
             return sentences_candidates_representations, idx_var
         loop_cond=lambda a1, idx: tf.less(idx, sentence_num)
         loop_vars=[all_sentence_candidates_representations, idx_var]
-        all_sentence_candidates_representations, idx_var=tf.while_loop(loop_cond, _recurse_sentence,loop_vars, 
-            shape_invariants=[tf.TensorShape([None, None, 2*self.config.hidden_dim]), idx_var.get_shape()])
+        all_sentence_candidates_representations, idx_var=tf.while_loop(loop_cond, _recurse_sentence,loop_vars,
+                                                                       shape_invariants=[tf.TensorShape([None, None, 2*self.config.hidden_dim]), idx_var.get_shape()])
 
-        all_sentence_candidates_representations=tf.reshape(all_sentence_candidates_representations, [-1, 2*self.config.hidden_dim])        
+        all_sentence_candidates_representations=tf.reshape(all_sentence_candidates_representations, [-1, 2*self.config.hidden_dim])
         return all_sentence_candidates_representations
     def get_candidates_representations_in_sentence(self, sentence_candidate_answers, sentence_attentioned_hidden_states):
         candidate_answer_num=tf.gather(tf.shape(sentence_candidate_answers), 0)
@@ -80,7 +80,7 @@ class ccrc_model(object):
         def _recurse_candidate_answer(candidate_final_representations, idx_cand):
             cur_candidate_answer_nodeids=tf.gather(sentence_candidate_answers, idx_cand)
             cur_candidate_answer_hidden_list=tf.gather(sentence_attentioned_hidden_states, cur_candidate_answer_nodeids)
-            cur_candidate_final_representations=tf.expand_dims( 
+            cur_candidate_final_representations=tf.expand_dims(
                 self.get_candidate_answer_final_representations(cur_candidate_answer_hidden_list), 0)
             candidate_final_representations=tf.concat([candidate_final_representations, cur_candidate_final_representations], axis=0)
             idx_cand=tf.add(idx_cand,1)
@@ -88,7 +88,7 @@ class ccrc_model(object):
         loop_cond=lambda a1,idx:tf.less(idx, candidate_answer_num)
         loop_vars=[candidates_final_representations, idx_cand]
         candidates_final_representations, idx_cand=tf.while_loop(loop_cond, _recurse_candidate_answer, loop_vars,
-            shape_invariants=[tf.TensorShape([None, 2*self.config.hidden_dim]),idx_cand.get_shape()])
+                                                                 shape_invariants=[tf.TensorShape([None, 2*self.config.hidden_dim]),idx_cand.get_shape()])
         return candidates_final_representations
     def get_candidate_answer_final_representations(self, candidate_answer_hidden_list):
         inputs=tf.expand_dims(candidate_answer_hidden_list,axis=0)
@@ -98,8 +98,8 @@ class ccrc_model(object):
         #    fwcell=rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh) 
         #with tf.variable_scope('candidate_answer_generation_backward',reuse=True):
         #    bwcell=rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
-        chain_outputs, chain_state=tf.nn.bidirectional_dynamic_rnn(self.fwcell, self.bwcell, inputs, 
-            sequence_length, initial_state_fw=self._fw_initial_state, initial_state_bw=self._bw_initial_state,scope='candidate_answer_{}'.format(self.scope_index))
+        chain_outputs, chain_state=tf.nn.bidirectional_dynamic_rnn(self.fwcell, self.bwcell, inputs,
+                                                                   sequence_length, initial_state_fw=self._fw_initial_state, initial_state_bw=self._bw_initial_state,scope='candidate_answer_{}'.format(self.scope_index))
 
         self.scope_index+=1
         chain_outputs=tf.concat(chain_outputs, 2)
@@ -132,16 +132,16 @@ class ccrc_model(object):
 
             feed={
                 self.q_encoding.bp_lstm.input:b_input,
-                self.q_encoding.bp_lstm.treestr:b_treestr, 
-                self.q_encoding.td_lstm.t_input:t_input, 
-                self.q_encoding.td_lstm.t_treestr:t_treestr, 
-                self.q_encoding.td_lstm.t_par_leaf:t_parent, 
-                self.q_encoding.bp_lstm.dropout:self.config.dropout, 
+                self.q_encoding.bp_lstm.treestr:b_treestr,
+                self.q_encoding.td_lstm.t_input:t_input,
+                self.q_encoding.td_lstm.t_treestr:t_treestr,
+                self.q_encoding.td_lstm.t_par_leaf:t_parent,
+                self.q_encoding.bp_lstm.dropout:self.config.dropout,
                 self.q_encoding.td_lstm.dropout:self.config.dropout,
 
-                self.c_encoding.c_bp_lstm.sentence_num:sentence_num, 
-                self.c_encoding.c_bp_lstm.input:c_inputs, 
-                self.c.encoding.c_bp_lstm.treestr:c_treestrs, 
+                self.c_encoding.c_bp_lstm.sentence_num:sentence_num,
+                self.c_encoding.c_bp_lstm.input:c_inputs,
+                self.c.encoding.c_bp_lstm.treestr:c_treestrs,
                 self.c_encoding.c_bp_lstm.dropout:self.config.dropout,
                 self.c_encoding.c_td_lstm.t_input:c_t_inputs,
                 self.c_encoding.c_td_lstm.t_treestr:c_t_treestrs,
@@ -151,7 +151,7 @@ class ccrc_model(object):
                 self.correct_answer_idx:target_answer_idx,
                 self.candidate_answers:candidate_answers,
                 self.candidate_answer_overall_number:candidate_ansewrs_number
-                }
+            }
             fetches=[self.loss, self.train_op]
             curloss, curtrain=sess.run(fetches,feed_dict=feed)
             losses.append(curloss)
@@ -180,7 +180,7 @@ class ccrc_model(object):
             cross_entropy=tf.squeeze(cross_entropy)
             return cross_entropy
     def add_training_op(self):
-        opt=tr.train.AdagradOptimizer(self.config.lr)
+        opt=tf.train.AdagradOptimizer(self.config.lr)
         train_op=opt.minimize(self.loss)
         return train_op
 if __name__=='__main__':

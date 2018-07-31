@@ -21,11 +21,11 @@ def load_embedding():
             array=line.lstrip().rstrip().split(' ')
             vector=list(map(float,array[1:]))
             word = array[0]
-            
+
             if word not in word2idx:
-              embeddings.append(vector)
-              word2idx[word]=len(embeddings)-1 
-              #word=array[0]
+                embeddings.append(vector)
+                word2idx[word]=len(embeddings)-1
+                #word=array[0]
     print(len(word2idx))
     print(len(embeddings))
     return word2idx, embeddings
@@ -34,7 +34,7 @@ def load_squad_data():
     train_data, trainCounter,dev_data, devCounter=prepro(args)
     train_qlist=[]
     dev_qlist=[]
-    with open('train_q.txt','w+')as qout, open('train_a.txt','w+') as aout, open('train_c.txt','w+') as cout:    
+    with open('train_q.txt','w+')as qout, open('train_a.txt','w+') as aout, open('train_c.txt','w+') as cout:
         for qindex, data in enumerate(tqdm(train_data)):
             question, answers, context=data[0],data[1],data[2]
             train_qlist.append(question)
@@ -59,7 +59,7 @@ def load_squad_data():
         for j in range(len(contexts)):
             cur_context_trees.append(get_tree(contexts[j]))
         train_context_trees.append(cur_context_trees)
-        
+
     for i in range(len(train_data)):
         train_data[i][0]=train_trees[i]
         train_data[i][1]=train_answer
@@ -120,7 +120,7 @@ def prepro_each(args, data_type):
             for sen in xi:
                 for word in sen:
                     word_counter[word]+=len(para['qas'])
-                    
+
             for qa in para['qas']:
                 q=qa['question']
                 qi=word_tokenize(qa['question'])
@@ -176,7 +176,7 @@ def parse_tree(sentence,parents):
             idx = i
             prev = None
             while True:
-                node = tNode(idx) 
+                node = tNode(idx)
                 if prev is not None:
                     assert prev.idx != node.idx
                     node.add_child(prev)
@@ -213,8 +213,8 @@ def get_tree(sentence):#由一个句子获得一棵树
     constituency_parse(sentence)
     root=load_tree('tmp.tok','tmp.cparents')
     postOrder=root.postOrder
-    postOrder(root,tNode.get_height,None) 
-    postOrder(root,tNode.get_numleaves,None) 
+    postOrder(root,tNode.get_height,None)
+    postOrder(root,tNode.get_numleaves,None)
     postOrder(root,root.get_spans,None)
     postOrder(root,root.print_span,None)
     print(root.height,root.num_leaves)
@@ -345,7 +345,7 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list):
 
     return candidate_answers, correct_answer_idx, candidate_answer_overall_number
 
-if __name__ =='__main__':                                                                                                                       
+if __name__ =='__main__':
     root=get_tree('Yet the act is still charming here.')
     word2idx,embedding=load_embedding()
     #leaves,inodes=BFStree(root)

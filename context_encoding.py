@@ -15,10 +15,10 @@ class context_encoding(object):
         self.inputs=self.c_bp_lstm.sentences_root_states
         self.inputs=tf.expand_dims(self.inputs, 0) #[1 , sentence_num, hidden_dim]
         self.sentence_num=tf.gather(tf.shape(self.inputs),1)
-        self.sentence_num_batch=tf.expand_dims(self.sentence_num, 0)  #[1]   
-        with tf.variable_scope('context_lstm_forward'): 
+        self.sentence_num_batch=tf.expand_dims(self.sentence_num, 0)  #[1]
+        with tf.variable_scope('context_lstm_forward'):
             self.fwcell=rnn.BasicLSTMCell(config.hidden_dim, activation=tf.nn.tanh)
-        with tf.variable_scope('context_lstm_backward'): 
+        with tf.variable_scope('context_lstm_backward'):
             self.bwcell=rnn.BasicLSTMCell(config.hidden_dim, activation=tf.nn.tanh)
         with tf.variable_scope('context_bidirectional_chain_lstm'):
             self._fw_initial_state=self.fwcell.zero_state(1,dtype=tf.float32)
@@ -27,10 +27,10 @@ class context_encoding(object):
 
         chain_outputs=tf.concat(chain_outputs, 2) #[1, sentence_num, 2*hidden_dim]
         chain_outputs=tf.gather(chain_outputs, 0) #[sentence_num, 2*hidden_dim]
-        
+
         self.c_td_lstm=context_top_down_lstm(config, self.c_bp_lstm, chain_outputs)
         self.sentences_final_states=self.get_tree_states(self.c_bp_lstm.sentences_hidden_states, self.c_td_lstm.sentences_hidden_states)
-            
+
     def get_tree_states(self, sentences_bp_states,sentences_td_states):
         rev_td_states=tf.reverse(sentences_td_states, axis=[1])
         states=tf.concat(values=[sentences_bp_states, rev_td_states],axis=2)
@@ -60,14 +60,14 @@ class context_bottom_up_lstm(object):
         hidden_states = tf.map_fn(_get_root_states,sentences_states)
         return hidden_states
 
-    def add_placeholders(self):       
-        dim2=self.config.maxnodesize #parse tree node的数量
+    def add_placeholders(self):
+        dim2=self.config.maxnodesize #parse tree node
         #dim1=self.max_sentence_num  # max sentence num, parallel computing
         self.sentence_num=tf.placeholder(tf.int32,name='context_sentence_num')
         self.input = tf.placeholder(tf.int32,[None,dim2],name='context_input')
         self.input=tf.gather(self.input, tf.range(self.sentence_num))
         self.treestr = tf.placeholder(tf.int32,[None,dim2,2],name='context_tree')
-        self.treestr = tf.gather(self.treestr, tf.range(self.sentence_num)) 
+        self.treestr = tf.gather(self.treestr, tf.range(self.sentence_num))
         self.dropout = tf.placeholder(tf.float32,name='context_dropout')
         self.n_inodes = tf.reduce_sum(tf.to_int32(tf.not_equal(self.treestr,-1)),[1,2])
         self.n_inodes = self.n_inodes//2
@@ -79,9 +79,9 @@ class context_bottom_up_lstm(object):
             embedding=tf.get_variable('embedding')
             ix=tf.to_int32(tf.not_equal(self.input,-1))*self.input
             emb_tree=tf.nn.embedding_lookup(embedding,ix)
-            #emb_tree [sentence_num, maxnodesize, emb_dim] 
+            #emb_tree [sentence_num, maxnodesize, emb_dim]
             emb_tree=emb_tree*(tf.expand_dims(
-                        tf.to_float(tf.not_equal(self.input,-1)),2))
+                tf.to_float(tf.not_equal(self.input,-1)),2))
             return emb_tree
     def calc_wt_init(self,fan_in=300):
         eps=1.0/np.sqrt(fan_in)
@@ -89,27 +89,25 @@ class context_bottom_up_lstm(object):
     def add_model_variables(self):
 
         with tf.variable_scope("context_btp_Composition",
-                                initializer=
-                                tf.contrib.layers.xavier_initializer(),
-                                regularizer=
-                                tf.contrib.layers.l2_regularizer(self.config.reg
-            )):
+                               initializer=
+                               tf.contrib.layers.xavier_initializer(),
+                               regularizer=
+                               tf.contrib.layers.l2_regularizer(self.config.reg
+                                                                )):
 
             cU = tf.get_variable("cU",[self.emb_dim,2*self.hidden_dim],initializer=tf.random_uniform_initializer(-self.calc_wt_init(),self.calc_wt_init()))
             cW = tf.get_variable("cW",[self.degree*self.hidden_dim,(self.degree+3)*self.hidden_dim],initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),self.calc_wt_init(self.hidden_dim)))
             cb = tf.get_variable("cb",[4*self.hidden_dim],initializer=tf.constant_initializer(0.0),regularizer=tf.contrib.layers.l2_regularizer(0.0))
 
     def process_leafs(self,emb):
-        #emb: [num_leaves, emd_dim]    
+        #emb: [num_leaves, emd_dim]
         with tf.variable_scope("btp_Composition",reuse=True):
             cU = tf.get_variable("cU",[self.emb_dim,2*self.hidden_dim])
             cb = tf.get_variable("cb",[4*self.hidden_dim])
             b = tf.slice(cb,[0],[2*self.hidden_dim])
-            #叶子节点没有input gate和forget gate,需要计算output gate 和Input value
             def _recurseleaf(x):
                 #[1, emb_dim], [emb_dim, 2*self.hidden_dim]
                 concat_uo = tf.matmul(tf.expand_dims(x,0),cU) + b
-                #把concat_uo切割成
                 #[1*hidden_dim] [1*hidden_dim]
                 u,o = tf.split(axis=1,num_or_size_splits=2,value=concat_uo)
                 o=tf.nn.sigmoid(o)
@@ -134,8 +132,8 @@ class context_bottom_up_lstm(object):
             return states,emb_batch,idx_batch
         loop_cond=lambda a1,b1,idx_var: tf.less(idx_var, self.sentence_num)
         loop_vars=[states_h,emb_batch,idx_batch]
-        states_h,emb_batch,idx_batch=tf.while_loop(loop_cond, _computestates, loop_vars, 
-            shape_invariants=[tf.TensorShape([None,None,self.hidden_dim]),emb_batch.get_shape(),idx_batch.get_shape()])
+        states_h,emb_batch,idx_batch=tf.while_loop(loop_cond, _computestates, loop_vars,
+                                                   shape_invariants=[tf.TensorShape([None,None,self.hidden_dim]),emb_batch.get_shape(),idx_batch.get_shape()])
         return states_h  #[sentence_num, node_size, hidden_dim]
     def compute_states(self,emb,idx_batch=0):
         num_leaves = tf.squeeze(tf.gather(self.num_leaves,idx_batch))
@@ -152,9 +150,8 @@ class context_bottom_up_lstm(object):
         nodes_c=tf.identity(leaf_c)
         idx_var=tf.constant(0) #tf.Variable(0,trainable=False)
         with tf.variable_scope("btp_Composition",reuse=True):
-            # cW 2*hidden（两个子节点的Hidden value, 5*hidden
             cW = tf.get_variable("cW",[self.degree*self.hidden_dim,(self.degree+3)*self.hidden_dim])
-            cb = tf.get_variable("cb",[4*self.hidden_dim])            
+            cb = tf.get_variable("cb",[4*self.hidden_dim])
             bu,bo,bi,bf=tf.split(axis=0,num_or_size_splits=4,value=cb)
             def _recurrence(node_h,node_c,idx_var):
                 node_info=tf.gather(treestr,idx_var)
@@ -163,8 +160,8 @@ class context_bottom_up_lstm(object):
                 child_c=tf.gather(node_c,node_info)
                 flat_ = tf.reshape(child_h,[-1])
                 #[1* hidden_dim]
-                tmp=tf.matmul(tf.expand_dims(flat_,0),cW)                
-                u,o,i,fl,fr=tf.split(axis=1,num_or_size_splits=5,value=tmp)                
+                tmp=tf.matmul(tf.expand_dims(flat_,0),cW)
+                u,o,i,fl,fr=tf.split(axis=1,num_or_size_splits=5,value=tmp)
                 i=tf.nn.sigmoid(i+bi)
                 o=tf.nn.sigmoid(o+bo)
                 u=tf.nn.tanh(u+bu)
@@ -182,9 +179,9 @@ class context_bottom_up_lstm(object):
             loop_cond = lambda a1,b1,idx_var: tf.less(idx_var,n_inodes)
             loop_vars=[nodes_h,nodes_c,idx_var]
             nodes_h,nodes_c,idx_var=tf.while_loop(loop_cond, _recurrence,
-                                                loop_vars,parallel_iterations=10)
+                                                  loop_vars,parallel_iterations=10)
             return tf.expand_dims(nodes_h,0)
-        #[1* node_num ,hidden_value]
+            #[1* node_num ,hidden_value]
     def add_training_op(self):
         pass
 
@@ -208,17 +205,17 @@ class context_top_down_lstm(object):
         def _get_root_states(x):
             states=tf.gather(x, tf.subtract(tf.gather(tf.shape(x),0),1))
             return states
-        hidden_states = tf.map_fn(_get_root_states,sentences_states)        
+        hidden_states = tf.map_fn(_get_root_states,sentences_states)
     def add_embedding(self):
         with tf.variable_scope("Embed",reuse=True):
-            #emb_tree [sentence_num, maxnodesize, emb_dim] 
+            #emb_tree [sentence_num, maxnodesize, emb_dim]
             #input[sentence_num, maxnodesize ]
             embedding=tf.get_variable('embedding')
             tix=tf.to_int32(tf.not_equal(self.t_input,-1))*self.t_input
             emb_tree=tf.nn.embedding_lookup(embedding, tix)
             #sentencenum*maxnodesize*embedding_dim
             emb_tree=emb_tree*(tf.expand_dims(
-                        tf.to_float(tf.not_equal(self.t_input,-1)),2))
+                tf.to_float(tf.not_equal(self.t_input,-1)),2))
             return emb_tree
     def add_placeholders(self):
         dim2=self.config.maxnodesize
@@ -236,12 +233,12 @@ class context_top_down_lstm(object):
         self.n_inodes =tf.add(self.n_inodes,adder)
     def add_more_variables(self):
         with tf.variable_scope('context_td_composition',initializer=tf.contrib.layers.xavier_initializer(),
-            regularizer=tf.contrib.layers.l2_regularizer(self.config.reg)):
+                               regularizer=tf.contrib.layers.l2_regularizer(self.config.reg)):
             #hidden states and cell states of parents
             cW = tf.get_variable("cW",[self.hidden_dim+self.emb_dim,4*self.hidden_dim],
-                initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),self.calc_wt_init(self.hidden_dim)))
+                                 initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),self.calc_wt_init(self.hidden_dim)))
             cb = tf.get_variable("cb",[4*self.hidden_dim],
-                initializer=tf.constant_initializer(0.0),regularizer=tf.contrib.layers.l2_regularizer(0.0))
+                                 initializer=tf.constant_initializer(0.0),regularizer=tf.contrib.layers.l2_regularizer(0.0))
     def calc_wt_init(self,fan_in=300):
         eps=1.0/np.sqrt(fan_in)
         return eps
@@ -264,7 +261,7 @@ class context_top_down_lstm(object):
         loop_cond=lambda idx,a: tf.less(idx, self.sentence_num)
         loop_vars=[idx_curbatch, nodes_h_states]
         idx_curbatch, nodes_h_states=tf.while_loop(loop_cond, _tdcomputestate, loop_vars,
-            shape_invariants=[idx_curbatch.get_shape(),tf.TensorShape([None,None,self.hidden_dim])])
+                                                   shape_invariants=[idx_curbatch.get_shape(),tf.TensorShape([None,None,self.hidden_dim])])
         return nodes_h_states
 
     def process_leafs(self,inodes_h,inodes_c,emb_leaves,idx_batch):
@@ -311,7 +308,7 @@ class context_top_down_lstm(object):
             loop_cond=lambda a1,b1,idx_var:tf.less(idx_var,num_leaves)
             loop_vars=[node_h,node_c,idx_var]
             node_h,node_c,idx_var=tf.while_loop(loop_cond, _recurceleaf,loop_vars,
-                shape_invariants=[tf.TensorShape([None,self.hidden_dim]),tf.TensorShape([None,self.hidden_dim]),idx_var.get_shape()])
+                                                shape_invariants=[tf.TensorShape([None,self.hidden_dim]),tf.TensorShape([None,self.hidden_dim]),idx_var.get_shape()])
             logging.warn('return new node_h, finished')
             return node_h,node_c
     def compute_inodes_states(self,idx_batch=0):
@@ -353,5 +350,5 @@ class context_top_down_lstm(object):
             loop_cond=lambda a1,b1,idx_var: tf.less(idx_var, n_inodes)
             loop_vars=[inode_h,inode_c,idx_var]
             inode_h,inode_c,idx_var=tf.while_loop(loop_cond, _recurrence,loop_vars,
-                shape_invariants=[tf.TensorShape([None, self.hidden_dim]),tf.TensorShape([None,self.hidden_dim]), idx_var.get_shape()])
+                                                  shape_invariants=[tf.TensorShape([None, self.hidden_dim]),tf.TensorShape([None,self.hidden_dim]), idx_var.get_shape()])
             return inode_h,inode_c

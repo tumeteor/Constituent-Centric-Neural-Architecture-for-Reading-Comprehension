@@ -40,7 +40,7 @@ class tNode(object):
             root.height = max(root.get_left().height,root.get_right().height)+1
         else:
             root.height=1
-        #print(root.idx,root.height,'asa' if root.word==None else root.word)
+            #print(root.idx,root.height,'asa' if root.word==None else root.word)
 
     @staticmethod
     def get_size(root):
