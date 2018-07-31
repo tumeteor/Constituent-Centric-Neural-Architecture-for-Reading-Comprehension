@@ -23,11 +23,13 @@ def load_embedding():
             word = array[0]
 
             if word not in word2idx:
-                embeddings.append(vector)
-                word2idx[word]=len(embeddings)-1
-                #word=array[0]
-    embeddings = np.array(embeddings)
-    logging.WARN("embedding shape: {}".format(embeddings.shape))
+                if (len(vector) != 300): print(word)
+                else:
+                  embeddings.append(vector)
+                  word2idx[word]=len(embeddings)-1
+                  #word=array[0]
+    #embeddings = np.asarray(embeddings, dtype=np.float32)
+    #print("embedding shape: {}".format(embeddings.shape))
     return word2idx, embeddings
 def load_squad_data():
     args=get_args()
