@@ -50,6 +50,7 @@ class question_encoding(object):
 
 class top_down_lstm(object):
     def __init__(self,config,bp_lstm):
+        print('init topdown')
         self.emb_dim=config.emb_dim
         self.hidden_dim=config.hidden_dim
         self.num_emb=config.num_emb
@@ -181,6 +182,7 @@ class top_down_lstm(object):
 
 class bottom_up_lstm(object):
     def __init__(self,config):
+        print('init bottomup')
         self.emb_dim = config.emb_dim
         self.hidden_dim = config.hidden_dim
         self.num_emb = config.num_emb

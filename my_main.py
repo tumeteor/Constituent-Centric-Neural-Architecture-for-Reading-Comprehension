@@ -32,7 +32,7 @@ def train(restore=False):
     gpu_config=tf.ConfigProto()
     gpu_config.gpu_options.allow_growth=True
     config=Config()
-    logging.basicConfig(filename="logger.log",level=logging.WARNING)
+    logging.basicConfig(filename="logger.log",level=logging.WARN)
     data,word2idx,embedding=load_data.load_squad_data()
     #data['train']  
     #[#][0] the root node of the question
