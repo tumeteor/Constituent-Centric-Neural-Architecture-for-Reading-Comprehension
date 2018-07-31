@@ -30,7 +30,7 @@ class attnention_layer(object):
             sentence_id = tf.add(sentence_id, 1)
             return final_hiddens, sentence_id
 
-        loop_cond = lambda a1, a2, sentence_id: tf.less(sentence_id, sentence_num)
+        loop_cond = lambda a1, sentence_id: tf.less(sentence_id, sentence_num)
         loop_vars = [context_attentioned_hiddens, sentence_id]
         context_attentioned_hiddens, sentence_id = tf.while_loop(loop_cond, _recurse_sentence, loop_vars,
                                                                  shape_invariants=[tf.TensorShape([None, None,
