@@ -113,7 +113,7 @@ def test_tNode():
     postOrder(root,tNode.get_height,None)
     postOrder(root,tNode.get_numleaves,None)
     postOrder(root,root.get_spans,None)
-    print(root.height,root.num_leaves)
+    #print(root.height,root.num_leaves)
     for n in nodes.itervalues():print(n.span)
 
 if __name__=='__main__':

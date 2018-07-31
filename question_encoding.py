@@ -50,7 +50,7 @@ class question_encoding(object):
 
 class top_down_lstm(object):
     def __init__(self,config,bp_lstm):
-        print('init topdown')
+        logging.warn('init topdown')
         self.emb_dim=config.emb_dim
         self.hidden_dim=config.hidden_dim
         self.num_emb=config.num_emb
@@ -182,7 +182,7 @@ class top_down_lstm(object):
 
 class bottom_up_lstm(object):
     def __init__(self,config):
-        print('init bottomup')
+        logging.warn('init bottomup')
         self.emb_dim = config.emb_dim
         self.hidden_dim = config.hidden_dim
         self.num_emb = config.num_emb
@@ -203,6 +203,7 @@ class bottom_up_lstm(object):
         #self.emb_mat=np.array([idx2vec[idx] if idx in idx2vec  \
         #    else np.random.multivariate_normal(np.zeros(config.emb_dim) for idx in range(len(config.vocab_counter))       
     def add_placeholders(self):
+        logging.warn('add question placeholders')
         dim2=self.config.maxnodesize #parse tree node
         self.input = tf.placeholder(tf.int32,[dim2],name='input')
         self.treestr = tf.placeholder(tf.int32,[dim2,2],name='tree')
@@ -212,12 +213,15 @@ class bottom_up_lstm(object):
         self.n_inodes = self.n_inodes//2
         self.num_leaves = tf.reduce_sum(tf.to_int32(tf.not_equal(self.input,-1)),[0])
     def add_embedding(self):
+        logging.warn('add question embedding')
         #embed=np.load('glove{0}_uniform.npy'.format(self.emb_dim))
         with tf.variable_scope("Embed",regularizer=None):
             #embedding=tf.get_variable('embedding',[self.num_emb,self.emb_dim],initializer=self.emb_mat, trainable=False)
             embedding=tf.get_variable('embedding',initializer=self.config.embedding,trainable=False,regularizer=None)
             ix=tf.to_int32(tf.not_equal(self.input,-1))*self.input
+            logging.warn('lookup emb_tree')
             emb_tree=tf.nn.embedding_lookup(embedding,ix)
+            logging.warn('lookup emb_tree2')
             #emb_tree [maxnodesize, emb_dim] 
             #multiplier: [maxnodesize * 1 ]
             emb_tree=emb_tree*(tf.expand_dims(
