@@ -217,7 +217,8 @@ class bottom_up_lstm(object):
         #embed=np.load('glove{0}_uniform.npy'.format(self.emb_dim))
         with tf.variable_scope("Embed",regularizer=None):
             #embedding=tf.get_variable('embedding',[self.num_emb,self.emb_dim],initializer=self.emb_mat, trainable=False)
-            embedding=tf.get_variable('embedding', initializer=self.config.embedding,trainable=False,regularizer=None)
+            embedding=tf.get_variable('embedding', shape=self.config.embedding.shape,
+            initializer=tf.constant_initializer(self.config.embedding),trainable=False,regularizer=None)
             ix=tf.to_int32(tf.not_equal(self.input,-1))*self.input
             logging.warn('lookup emb_tree')
             emb_tree=tf.nn.embedding_lookup(embedding,ix)

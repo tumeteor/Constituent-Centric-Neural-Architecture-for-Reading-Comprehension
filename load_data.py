@@ -26,9 +26,9 @@ def load_embedding():
                 embeddings.append(vector)
                 word2idx[word]=len(embeddings)-1
                 #word=array[0]
-    print(len(word2idx))
-    print(len(embeddings))
-    return word2idx, np.array(embeddings)
+    embeddings = np.array(embeddings)
+    logging.WARN("embedding shape: {}".format(embeddings.shape))
+    return word2idx, embeddings
 def load_squad_data():
     args=get_args()
     train_data, trainCounter,dev_data, devCounter=prepro(args)
