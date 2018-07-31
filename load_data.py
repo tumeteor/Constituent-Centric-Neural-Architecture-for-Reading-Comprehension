@@ -28,7 +28,7 @@ def load_embedding():
                 #word=array[0]
     print(len(word2idx))
     print(len(embeddings))
-    return word2idx, embeddings
+    return word2idx, np.array(embeddings)
 def load_squad_data():
     args=get_args()
     train_data, trainCounter,dev_data, devCounter=prepro(args)
