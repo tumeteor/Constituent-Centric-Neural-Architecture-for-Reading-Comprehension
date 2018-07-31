@@ -60,14 +60,14 @@ class ccrc_model(object):
         idx_var = tf.constant(1)
 
         def _recurse_sentence(sentences_candidates_representations, idx_var):
-            sentence_candidate_answers = tf.gather(tf.shape(candidate_answers), idx_var)
+            sentence_candidate_answers = tf.gather(candidate_answers, idx_var)
             sentence_attentioned_hidden_states = tf.gather(self.att_layer.attentioned_hidden_states, idx_var)
             candidates_representations = self.get_candidates_representations_in_sentence(sentence_candidate_answers,
                                                                                          sentence_attentioned_hidden_states)
             candidates_representations = tf.expand_dims(candidates_representations, 0)
             sentences_candidates_representations = tf.concat(
                 [sentences_candidates_representations, candidates_representations])
-            idx_var = tf.add(idx_var, 1)
+            idx_var = tf.add(idx_var, 1) #increase 1
             return sentences_candidates_representations, idx_var
 
         loop_cond = lambda a1, idx: tf.less(idx, sentence_num)
