@@ -1,8 +1,10 @@
 import tensorflow as tf
 
 class attnention_layer(object):
-    def __init__(self, question_encode, context_encode):
-        self.attentioned_hidden_states = self.get_context_attentioned_hiddens
+    def __init__(self, config, question_encode, context_encode):
+        self.config = config
+        self.attentioned_hidden_states = self.get_context_attentioned_hiddens(question_encode, context_encode)
+
         # [sentence_num, node_size, 4*hidden_dim]
 
     def get_context_attentioned_hiddens(self, question_encode, context_encode):
