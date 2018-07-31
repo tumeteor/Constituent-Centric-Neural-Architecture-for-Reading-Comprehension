@@ -84,8 +84,8 @@ class ccrc_model(object):
     def get_candidates_representations_in_sentence(self, sentence_candidate_answers,
                                                    sentence_attentioned_hidden_states):
         candidate_answer_num = tf.gather(tf.shape(sentence_candidate_answers), 0)
-        logging.warn('candidate_answer_num:{}'.format(candidate_answer_num))
-        logging.warn('sentence_candidate_answers:{}'.format(sentence_candidate_answers))
+        print('candidate_answer_num:{}'.format(candidate_answer_num))
+        print('sentence_candidate_answers:{}'.format(sentence_candidate_answers))
         candidate_answer_nodeids = tf.gather(sentence_candidate_answers, 0)  # a node idx list
         candidate_answer_hidden_list = tf.gather(sentence_attentioned_hidden_states, candidate_answer_nodeids)
         candidate_final_representations = self.get_candidate_answer_final_representations(candidate_answer_hidden_list)
