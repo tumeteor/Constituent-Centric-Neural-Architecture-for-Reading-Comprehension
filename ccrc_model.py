@@ -27,7 +27,7 @@ class ccrc_model(object):
         # every constituency has a representation [ 4* hidden_dim]
         with tf.variable_scope('candidate_answer_generation_forward'):
             self.fwcell = rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
-        with tf.variable_scope('candidate_answer_generation_backword'):
+        with tf.variable_scope('candidate_answer_generation_backward'):
             self.bwcell = rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
         self._fw_initial_state = self.fwcell.zero_state(1, dtype=tf.float32)
         self._bw_initial_state = self.bwcell.zero_state(1, dtype=tf.float32)

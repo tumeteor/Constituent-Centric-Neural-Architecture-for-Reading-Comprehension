@@ -56,14 +56,14 @@ def load_squad_data():
     train_trees = []
     train_answer = []
     train_context_trees = []
-    for i in range(len(train_data)):
+    for i in tqdm(range(len(train_data))):
         train_trees.append(get_tree(train_data[i][0]))
 
         train_answer = get_word_idx(word_tokenize(train_data[i][1][0]),
                                     word2idx)  # consider that only one correct answer in train dataset
 
         cur_context_trees = []
-        contexts = nltk.sent_tokenize(train_data[i][2])
+        contexts = nltk.sent_tokenize(train_data[i][2]) # tokenize by sentences
         for j in range(len(contexts)):
             cur_context_trees.append(get_tree(contexts[j]))
         train_context_trees.append(cur_context_trees)
@@ -183,7 +183,6 @@ def constituency_parse(sentence, cp='', tokenize=True):
     cmd = (
     'java -cp {} ConstituencyParse -tokpath {} -parentpath {} -tokenize -  < {}'.format(classpath, tokpath, parentpath,
                                                                                         'tmp.txt'))
-    print(cmd)
     os.system(cmd)
 
 
@@ -231,7 +230,7 @@ def load_tree(tokfile, parentsfile):
     return parse_tree(sentence, parents)
 
 
-def get_tree(sentence):  # 由一个句子获得一棵树
+def get_tree(sentence):
     constituency_parse(sentence)
     root = load_tree('tmp.tok', 'tmp.cparents')
     postOrder = root.postOrder
