@@ -32,7 +32,7 @@ class question_encoding(object):
             for i in range(len(context_data)):
                 c_input,c_treestr,c_input,c_treestr, c_parent=load_data.extract_filled_tree(context_data[i], self.config,maxnodesize, word2idx=self.word2idx)
                 context_inputs.append([c_input,c_treestr,c_input, c_treestr,c_parent])
-
+            sess.run(self.bp_lstm.embedding_init, feed_dict={self.embedding_placeholder: self.config.embedding})
             feed={self.bp_lstm.input:b_input, self.bp_lstm.treestr:b_treestr,
                   self.td_lstm.t_input:t_input, self.td_lstm.t_treestr:t_treestr, self.td_lstm.t_par_leaf:t_parent,
                   self.bp_lstm.dropout:self.config.dropout, self.td_lstm.dropout:self.config.dropout}
@@ -219,8 +219,8 @@ class bottom_up_lstm(object):
             #embedding=tf.get_variable('embedding',[self.num_emb,self.emb_dim],initializer=self.emb_mat, trainable=False)
             #embedding=tf.get_variable('embedding', initializer=self.config.embedding,trainable=False,regularizer=None)
             embedding= tf.get_variable('embedding', shape=[2196017,300],trainable=False,regularizer=None)
-            embedding_placeholder = tf.placeholder(tf.float32, [2196017, 300])
-            embedding_init = embedding.assign(embedding_placeholder)
+            self.embedding_placeholder = tf.placeholder(tf.float32, [2196017, 300])
+            self.embedding_init = embedding.assign(self.embedding_placeholder)
 
             ix=tf.to_int32(tf.not_equal(self.input,-1))*self.input
             logging.warn('lookup emb_tree')

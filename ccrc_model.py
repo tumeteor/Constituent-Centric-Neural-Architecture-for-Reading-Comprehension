@@ -9,7 +9,7 @@ from tensorflow.contrib import seq2seq
 from tensorflow.contrib import legacy_seq2seq
 from question_encoding import *
 from context_encoding import *
-#from attention_layer import *
+from attention_layer import *
 
 class ccrc_model(object):
     #Here I assume that 
@@ -21,7 +21,7 @@ class ccrc_model(object):
         self.config=config
         self.sentence_num=self.c_encoding.sentence_num
         ##to do list
-        self.att_layer=attentioned_layer(config, self.q_encoding, self.c_encoding)
+        self.att_layer=attnention_layer(config, self.q_encoding, self.c_encoding)
         self.scope_index=0
         #every constituency has a representation [ 4* hidden_dim]
         with tf.variable_scope('candidate_answer_generation_forward'):
@@ -58,7 +58,7 @@ class ccrc_model(object):
             sentence_attentioned_hidden_states=tf.gather(self.att_layer.attentioned_hidden_states, idx_var)
             candidates_representations=self.get_candidates_representations_in_sentence(sentence_candidate_answers, sentence_attentioned_hidden_states)
             candidates_representations=tf.expand_dims(candidates_representations, 0)
-            sentences_candidates_representations=tf.cancat([sentences_candidates_representations, candidate])
+            sentences_candidates_representations=tf.concat([sentences_candidates_representations, candidates_representations])
             idx_var=tf.add(idx_var, 1)
             return sentences_candidates_representations, idx_var
         loop_cond=lambda a1, idx: tf.less(idx, sentence_num)
@@ -116,14 +116,14 @@ class ccrc_model(object):
             answer_data=data[curidx][1][0] #a word idx list
             context_data=data[curidx][2]
             candidate_answers, target_answer_idx, candidate_answers_number=load_data.candidate_answer_generate(answer_data, context_data)
-            if not has_answer:
-                logging.warn('It has no answer in constituency')
-                continue
+            # if not has_answer:
+            #     logging.warn('It has no answer in constituency')
+            #     continue
             #context_data is the list of root of sentences
             b_input, b_treestr, t_input, t_treestr, t_parent=load_data.extract_filled_tree(question_data,self.config.maxnodesize,word2idx=self.config.word2idx)
             c_inputs,c_treestrs, c_t_inputs,c_t_treestrs,c_t_parents=[],[],[],[],[]
             for i in range(len(context_data)):
-                c_input,c_treestr,c_t_input,c_t_treestr, c_t_parent=load_data.extract_filled_tree(context_data[i], self.config,maxnodesize, word2idx=self.word2idx)
+                c_input,c_treestr,c_t_input,c_t_treestr, c_t_parent=load_data.extract_filled_tree(context_data[i], self.config.maxnodesize, word2idx=self.word2idx)
                 c_inputs.append(c_input)
                 c_treestrs.append(c_treestr)
                 c_t_inputs.append(c_t_input)
@@ -139,7 +139,7 @@ class ccrc_model(object):
                 self.q_encoding.bp_lstm.dropout:self.config.dropout,
                 self.q_encoding.td_lstm.dropout:self.config.dropout,
 
-                self.c_encoding.c_bp_lstm.sentence_num:sentence_num,
+                self.c_encoding.c_bp_lstm.sentence_num:self.sentence_num,
                 self.c_encoding.c_bp_lstm.input:c_inputs,
                 self.c.encoding.c_bp_lstm.treestr:c_treestrs,
                 self.c_encoding.c_bp_lstm.dropout:self.config.dropout,
@@ -150,7 +150,7 @@ class ccrc_model(object):
 
                 self.correct_answer_idx:target_answer_idx,
                 self.candidate_answers:candidate_answers,
-                self.candidate_answer_overall_number:candidate_ansewrs_number
+                self.candidate_answer_overall_number:candidate_answers_number
             }
             fetches=[self.loss, self.train_op]
             curloss, curtrain=sess.run(fetches,feed_dict=feed)
