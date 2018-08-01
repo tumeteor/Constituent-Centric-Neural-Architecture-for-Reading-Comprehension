@@ -60,7 +60,7 @@ class ccrc_model(object):
                                                                                      sentence_attentioned_hidden_states)
         candidates_representations = tf.expand_dims(candidates_representations, 0)
 
-        all_sentence_candidates_representations = tf.identity(candidates_representations)
+        all_sentence_candidates_representations = tf.to_float(tf.identity(candidates_representations))
         sentence_num = tf.gather(tf.shape(self.att_layer.attentioned_hidden_states), 0)
         logging.warn('attentioned_hidden_states:{}'.format(self.att_layer.attentioned_hidden_states))
         idx_var = tf.constant(1)
@@ -95,7 +95,7 @@ class ccrc_model(object):
         candidate_answer_nodeids = tf.gather(sentence_candidate_answers, 0)  # a node idx list
         candidate_answer_hidden_list = tf.gather(sentence_attentioned_hidden_states, candidate_answer_nodeids)
         candidate_final_representations = self.get_candidate_answer_final_representations(candidate_answer_hidden_list)
-        candidates_final_representations = tf.expand_dims(candidate_final_representations, 0)
+        candidates_final_representations = tf.to_float(tf.expand_dims(candidate_final_representations, 0))
         idx_cand = tf.constant(1)
 
         def _recurse_candidate_answer(candidate_final_representations, idx_cand):

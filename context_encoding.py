@@ -136,7 +136,7 @@ class context_bottom_up_lstm(object):
         return hc
 
     def compute_sentences_states(self, emb_batch):
-        states_h = self.compute_states(emb_batch, 0)
+        states_h = tf.to_float(self.compute_states(emb_batch, 0))
         # [1 nodenum hidden_dim]
         idx_batch = tf.constant(1)
 
