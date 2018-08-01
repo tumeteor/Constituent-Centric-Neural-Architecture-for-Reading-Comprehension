@@ -52,24 +52,22 @@ def train(restore=False):
     np.random.seed(42)
     train = data['train']
     logging.warn('the length of train data:{}'.format(len(train)))
-
-    with tf.Graph().as_default():
-        with tf.Session() as sess:
-            session_conf = tf.ConfigProto(
-                allow_soft_placement=True,
-                log_device_placement=False,
-            )
-            session_conf.gpu_options.allow_growth = True
-            sess = tf.Session(config=session_conf)
-            with sess.as_default():
-                model = ccrc_model.ccrc_model(config)
-                saver = tf.train.Saver()
-                print("start training")
-                sess.run(tf.global_variables_initializer())
-                start_time = time.time()
-                if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
-                loss = model.train(train, sess)
-                print('average loss:{}'.format(loss))
+    model = ccrc_model.ccrc_model(config)
+    with tf.Session() as sess:
+        session_conf = tf.ConfigProto(
+            allow_soft_placement=True,
+            log_device_placement=False,
+        )
+        #session_conf.gpu_options.allow_growth = True
+        sess = tf.Session(config=session_conf)
+        with sess.as_default():
+            print("start training")
+            sess.run(tf.global_variables_initializer())
+            saver = tf.train.Saver()
+            start_time = time.time()
+            if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
+            loss = model.train(train, sess)
+            print('average loss:{}'.format(loss))
 
 
 
