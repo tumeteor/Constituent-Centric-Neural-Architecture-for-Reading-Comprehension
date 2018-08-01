@@ -118,8 +118,8 @@ class top_down_lstm(object):
         num_leaves = self.num_leaves
         embx = tf.gather(emb_leaves, tf.range(num_leaves))
         leaf_parent = tf.gather(self.t_par_leaf, tf.range(num_leaves))
-        node_h = tf.identity(inodes_h)
-        node_c = tf.identity(inodes_c)
+        node_h = tf.to_float(tf.identity(inodes_h))
+        node_c = tf.to_float(tf.identity(inodes_c))
         with tf.variable_scope('td_Composition', reuse=True):
             cW = tf.get_variable('cW', [self.hidden_dim + self.emb_dim, 4 * self.hidden_dim])
             cb = tf.get_variable('cb', [4 * self.hidden_dim])
@@ -169,8 +169,8 @@ class top_down_lstm(object):
 
         root_state = tf.expand_dims(root_state, 0)
         root_cell = tf.expand_dims(root_cell, 0)
-        inode_h = tf.identity(root_state)
-        inode_c = tf.identity(root_cell)
+        inode_h = tf.to_float(tf.identity(root_state))
+        inode_c = tf.to_float(tf.identity(root_cell))
         idx_var = tf.constant(1)
         with tf.variable_scope('td_Composition', reuse=True):
             cW = tf.get_variable('cW', [self.hidden_dim + self.emb_dim, 4 * self.hidden_dim])
@@ -258,6 +258,7 @@ class bottom_up_lstm(object):
             # multiplier: [maxnodesize * 1 ]
             emb_tree = emb_tree * (tf.expand_dims(
                 tf.to_float(tf.not_equal(self.input, -1)), 1))
+            #emb_tree = emb_tree * tf.to_float(tf.not_equal(tf.expand_dims(self.input,2),-1))
             return emb_tree
 
     def calc_wt_init(self, fan_in=300):
@@ -313,9 +314,9 @@ class bottom_up_lstm(object):
         # [num_leaves, 2*hidden_dim]
         leaf_hc = self.process_leafs(embx)
         leaf_h, leaf_c = tf.split(axis=1, num_or_size_splits=2, value=leaf_hc)
-        nodes_h = tf.identity(leaf_h)
+        nodes_h = tf.to_float(tf.identity(leaf_h))
         # [num_leaves, hidden_dim]
-        nodes_c = tf.identity(leaf_c)
+        nodes_c = tf.to_float(tf.identity(leaf_c))
         idx_var = tf.constant(0)  # tf.Variable(0,trainable=False)
         with tf.variable_scope("btp_Composition", reuse=True):
             cW = tf.get_variable("cW", [self.degree * self.hidden_dim, (self.degree + 3) * self.hidden_dim])
