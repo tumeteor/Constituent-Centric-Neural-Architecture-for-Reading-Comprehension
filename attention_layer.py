@@ -17,7 +17,8 @@ class attnention_layer(object):
         sentence_constituency = tf.gather(context_constituency, 0)
         context_attentioned_hiddens = self.get_sentence_attention_values(sentence_constituency, question_constituency,
                                                                          question_leaves, question_treestr)
-        context_attentioned_hiddens = tf.expand_dims(context_attentioned_hiddens,axis=0)
+        context_attentioned_hiddens = tf.to_float(tf.expand_dims(context_attentioned_hiddens,axis=0))
+
         sentence_num = context_encode.sentence_num
         sentence_id = tf.constant(1)
 
@@ -50,7 +51,7 @@ class attnention_layer(object):
         context_constituency = tf.gather(sentence_constituency, 0)
         attentioned_hiddens = self.get_constituency_attention_values(context_constituency, question_constituency,
                                                                      question_leaves, question_treestr)
-        attentioned_hiddens = tf.expand_dims(attentioned_hiddens, 0)
+        attentioned_hiddens = tf.to_float(tf.expand_dims(attentioned_hiddens, 0))
         sentence_nodes_num = tf.gather(tf.shape(sentence_constituency), 0)
         idx_var = tf.constant(1)
 
@@ -112,7 +113,7 @@ class attnention_layer(object):
             children_combine = tf.squeeze(children_combine)  # [2* hidden_dim]
             b = tf.multiply(tf.add(children_combine, context_constituency), tf.to_float(node_attentional_score))  # [2* hidden_dim]
             b = tf.expand_dims(b, axis=0)
-            attentional_representations = tf.concat([tf.to_float(attentional_representations), b], axis=0)
+            attentional_representations = tf.to_float(tf.concat([tf.to_float(attentional_representations), b], axis=0))
             idx_var = tf.add(idx_var, 1)
             return attentional_representations, idx_var
 
