@@ -52,13 +52,6 @@ def train(restore=False):
     np.random.seed(42)
     train = data['train']
     logging.warn('the length of train data:{}'.format(len(train)))
-    print("buid model")
-    model = ccrc_model.ccrc_model(config)
-    print("done")
-    init = tf.global_variables_initializer()
-    saver = tf.train.Saver()
-    print("start training")
-
 
     with tf.Graph().as_default():
         with tf.Session() as sess:
@@ -69,7 +62,10 @@ def train(restore=False):
             session_conf.gpu_options.allow_growth = True
             sess = tf.Session(config=session_conf)
             with sess.as_default():
-                sess.run(init)
+                model = ccrc_model.ccrc_model(config)
+                saver = tf.train.Saver()
+                print("start training")
+                sess.run(tf.global_variables_initializer())
                 start_time = time.time()
                 if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
                 loss = model.train(train, sess)
