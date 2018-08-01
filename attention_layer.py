@@ -73,7 +73,7 @@ class attnention_layer(object):
         loop_vars = [attentioned_hiddens, idx_var]
         attentioned_hiddens, idx_var = tf.while_loop(loop_cond, _recurse_context_constituency, loop_vars,
                                                      shape_invariants=[tf.TensorShape([None, 4 * self.config.hidden_dim]),
-                                                                       idx_var.get_shape()]
+                                                                       idx_var.get_shape()])
         logging.warn("check12: {}".format(attentioned_hiddens))
 
 
@@ -128,7 +128,7 @@ class attnention_layer(object):
                                                              shape_invariants=[
                                                                  tf.TensorShape([None, 2 * self.config.hidden_dim]),
                                                                  idx_var.get_shape()])
-        logging.warn("check12: {}".format(attentional_representations))
+        logging.warn("check13: {}".format(attentional_representations))
         root_attentional_representation = tf.gather(attentional_representations, tf.subtract(q_nodes, 1))
         concated_attentional_rep = tf.concat([context_constituency, tf.to_float(root_attentional_representation)], axis=0)
         return concated_attentional_rep
