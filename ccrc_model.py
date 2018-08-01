@@ -17,8 +17,8 @@ class ccrc_model(object):
     # the output size of LSTM unit used in the answer generation step is config.hidden_dim
 
     def __init__(self, config):
-        graph = tf.Graph()
-        with graph.as_default():
+        self.graph = tf.Graph()
+        with self.graph.as_default():
             with tf.device("/gpu:0"):
                 self.q_encoding = question_encoding(config)
                 self.c_encoding = context_encoding(config)
