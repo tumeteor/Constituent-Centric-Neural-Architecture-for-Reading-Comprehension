@@ -83,6 +83,8 @@ class ccrc_model(object):
                                                                              [None, None, 2 * self.config.hidden_dim]),
                                                                                            idx_var.get_shape()])
 
+        logging.warn("check9: {}".format(all_sentence_candidates_representations))
+
         all_sentence_candidates_representations = tf.reshape(all_sentence_candidates_representations,
                                                              [-1, 2 * self.config.hidden_dim])
         return all_sentence_candidates_representations
@@ -115,6 +117,8 @@ class ccrc_model(object):
                                                                    shape_invariants=[tf.TensorShape(
                                                                        [None, 2 * self.config.hidden_dim]),
                                                                                      idx_cand.get_shape()])
+        logging.warn("check10: {}".format(candidates_final_representations))
+
         return candidates_final_representations
 
     def get_candidate_answer_final_representations(self, candidate_answer_hidden_list):

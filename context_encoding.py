@@ -152,6 +152,8 @@ class context_bottom_up_lstm(object):
         states_h, emb_batch, idx_batch = tf.while_loop(loop_cond, _computestates, loop_vars,
                                                        shape_invariants=[tf.TensorShape([None, None, self.hidden_dim]),
                                                                          emb_batch.get_shape(), idx_batch.get_shape()])
+        logging.warn("check7: {}".format(states_h))
+
         return states_h  # [sentence_num, node_size, hidden_dim]
 
     def compute_states(self, emb, idx_batch=0):
@@ -201,6 +203,8 @@ class context_bottom_up_lstm(object):
             loop_vars = [nodes_h, nodes_c, idx_var]
             nodes_h, nodes_c, idx_var = tf.while_loop(loop_cond, _recurrence,
                                                       loop_vars, parallel_iterations=10)
+            logging.warn("check8: {}".format(nodes_h))
+
             return tf.expand_dims(nodes_h, 0)
             # [1* node_num ,hidden_value]
 
@@ -297,6 +301,7 @@ class context_top_down_lstm(object):
         idx_curbatch, nodes_h_states = tf.while_loop(loop_cond, _tdcomputestate, loop_vars,
                                                      shape_invariants=[idx_curbatch.get_shape(),
                                                                        tf.TensorShape([None, None, self.hidden_dim])])
+        logging.warn("check4: {}".format(nodes_h_states))
         return nodes_h_states
 
     def process_leafs(self, inodes_h, inodes_c, emb_leaves, idx_batch):
@@ -348,6 +353,7 @@ class context_top_down_lstm(object):
                                                     shape_invariants=[tf.TensorShape([None, self.hidden_dim]),
                                                                       tf.TensorShape([None, self.hidden_dim]),
                                                                       idx_var.get_shape()])
+            logging.warn("check5: {}".format(node_h))
             logging.warn('return new node_h, finished')
             return node_h, node_c
 
@@ -395,4 +401,5 @@ class context_top_down_lstm(object):
                                                       shape_invariants=[tf.TensorShape([None, self.hidden_dim]),
                                                                         tf.TensorShape([None, self.hidden_dim]),
                                                                         idx_var.get_shape()])
+            logging.warn("check6: {}".format(inode_h))
             return inode_h, inode_c

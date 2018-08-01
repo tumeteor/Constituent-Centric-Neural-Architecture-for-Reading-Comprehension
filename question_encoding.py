@@ -157,6 +157,7 @@ class top_down_lstm(object):
                                                     shape_invariants=[tf.TensorShape([None, self.hidden_dim]),
                                                                       tf.TensorShape([None, self.hidden_dim]),
                                                                       idx_var.get_shape()])
+            logging.warn("check2: {}".format(node_h))
             logging.warn('return new node_h, finished')
             return node_h, node_c
 
@@ -203,6 +204,7 @@ class top_down_lstm(object):
                                                       shape_invariants=[tf.TensorShape([None, self.hidden_dim]),
                                                                         tf.TensorShape([None, self.hidden_dim]),
                                                                         idx_var.get_shape()])
+            logging.warn("check3: {}".format(inode_h))
             return inode_h, inode_c
 
 
@@ -354,6 +356,7 @@ class bottom_up_lstm(object):
             loop_vars = [nodes_h, nodes_c, idx_var]
             nodes_h, nodes_c, idx_var = tf.while_loop(loop_cond, _recurrence,
                                                       loop_vars, parallel_iterations=10)
+            logging.warn("check1: {}".format(nodes_h))
             return nodes_h, nodes_c
             # [node_num ,hidden_value]
 
