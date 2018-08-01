@@ -63,9 +63,10 @@ def train(restore=False):
         with sess.as_default():
             print("start training")
             sess.run(tf.global_variables_initializer())
-            saver = tf.train.Saver()
+            #saver = tf.train.Saver()
+            
             start_time = time.time()
-            if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
+            #if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
             loss = model.train(train, sess)
             print('average loss:{}'.format(loss))
 

@@ -5,7 +5,7 @@ import json
 import os
 import nltk
 import argparse
-from collections import Counter
+from collections import Counter, deque
 import re
 import glob
 from tf_treenode import tNode, processTree
@@ -353,9 +353,9 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list):
         cur_candidate_answer = []
         constituency_id2span = {}
         leaf_num = 0
-        queue = deque([node])
+        queue = deque([root])
         while queue:
-            node = queue.poplest()
+            node = queue.popleft()
             if node.children != []:
                 candidate_answer_overall_number += 1
                 cur_candidate_answer.append([node.idx])

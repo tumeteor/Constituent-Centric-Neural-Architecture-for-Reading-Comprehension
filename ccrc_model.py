@@ -160,7 +160,7 @@ class ccrc_model(object):
             for i in range(len(context_data)):
                 c_input, c_treestr, c_t_input, c_t_treestr, c_t_parent = load_data.extract_filled_tree(context_data[i],
                                                                                                        self.config.maxnodesize,
-                                                                                                       word2idx=self.word2idx)
+                                                                                                       word2idx=self.config.word2idx)
                 c_inputs.append(c_input)
                 c_treestrs.append(c_treestr)
                 c_t_inputs.append(c_t_input)
@@ -178,7 +178,7 @@ class ccrc_model(object):
 
                 self.c_encoding.c_bp_lstm.sentence_num: self.sentence_num,
                 self.c_encoding.c_bp_lstm.input: c_inputs,
-                self.c.encoding.c_bp_lstm.treestr: c_treestrs,
+                self.c_encoding.c_bp_lstm.treestr: c_treestrs,
                 self.c_encoding.c_bp_lstm.dropout: self.config.dropout,
                 self.c_encoding.c_td_lstm.t_input: c_t_inputs,
                 self.c_encoding.c_td_lstm.t_treestr: c_t_treestrs,
