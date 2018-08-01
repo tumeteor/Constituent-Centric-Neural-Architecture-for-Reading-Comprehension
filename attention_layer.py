@@ -1,4 +1,5 @@
 import tensorflow as tf
+import logging
 
 class attnention_layer(object):
     def __init__(self, config, question_encode, context_encode):
@@ -37,6 +38,8 @@ class attnention_layer(object):
                                                                  shape_invariants=[tf.TensorShape([None, None,
                                                                                                    4 * self.config.hidden_dim]),
                                                                                    sentence_id.get_shape()])
+        logging.warn("check11: {}".format(context_attentioned_hiddens))
+
         return context_attentioned_hiddens
         # [sentence_num, node_size, 4*hidden_dim]
         # context_constituency_num=tf.shape(context_constituency)
@@ -70,7 +73,9 @@ class attnention_layer(object):
         loop_vars = [attentioned_hiddens, idx_var]
         attentioned_hiddens, idx_var = tf.while_loop(loop_cond, _recurse_context_constituency, loop_vars,
                                                      shape_invariants=[tf.TensorShape([None, 4 * self.config.hidden_dim]),
-                                                                       idx_var.get_shape()])
+                                                                       idx_var.get_shape()]
+        logging.warn("check12: {}".format(attentioned_hiddens))
+
 
         return attentioned_hiddens
 
@@ -96,7 +101,7 @@ class attnention_layer(object):
             attentional_leaves = tf.multiply(hiddens, tf.to_float(attention_score))
             return attentional_leaves
 
-        attentional_representations = tf.map_fn(_get_attentional_leaves, q_leaves)
+        attentional_representations = tf.to_float(tf.map_fn(_get_attentional_leaves, q_leaves))
         inodes_num = tf.subtract(q_nodes, question_leaves)
         idx_var = tf.constant(0)
 
@@ -123,6 +128,7 @@ class attnention_layer(object):
                                                              shape_invariants=[
                                                                  tf.TensorShape([None, 2 * self.config.hidden_dim]),
                                                                  idx_var.get_shape()])
+        logging.warn("check12: {}".format(attentional_representations))
         root_attentional_representation = tf.gather(attentional_representations, tf.subtract(q_nodes, 1))
         concated_attentional_rep = tf.concat([context_constituency, tf.to_float(root_attentional_representation)], axis=0)
         return concated_attentional_rep
