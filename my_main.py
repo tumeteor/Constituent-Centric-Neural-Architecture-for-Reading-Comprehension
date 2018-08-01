@@ -32,8 +32,7 @@ class Config(object):
 
 
 def train(restore=False):
-    gpu_config = tf.ConfigProto()
-    gpu_config.gpu_options.allow_growth = True
+    tf.reset_default_graph()
     config = Config()
     logging.basicConfig(filename="logger.log", level=logging.WARN)
     data, word2idx, embedding = load_data.load_squad_data()
@@ -59,12 +58,25 @@ def train(restore=False):
     init = tf.global_variables_initializer()
     saver = tf.train.Saver()
     print("start training")
-    with tf.Session() as sess:
-        sess.run(init)
-        start_time = time.time()
-        if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
-        loss = model.train(train, sess)
-        print('average loss:{}'.format(loss))
+
+
+    with tf.Graph().as_default():
+        with tf.Session() as sess:
+            session_conf = tf.ConfigProto(
+                allow_soft_placement=True,
+                log_device_placement=False,
+            )
+            session_conf.gpu_options.allow_growth = True
+            sess = tf.Session(config=session_conf)
+            with sess.as_default():
+                sess.run(init)
+                start_time = time.time()
+                if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
+                loss = model.train(train, sess)
+                print('average loss:{}'.format(loss))
+
+
+
 
 
 if __name__ == '__main__':
