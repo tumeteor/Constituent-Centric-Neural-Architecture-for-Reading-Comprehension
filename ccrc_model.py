@@ -33,7 +33,10 @@ class ccrc_model(object):
         self._bw_initial_state = self.bwcell.zero_state(1, dtype=tf.float32)
         self.add_placeholders()
         self.candidate_answer_representations = self.get_candidate_answer_representations()
-        assert tf.gather(tf.shape(self.candidate_answer_representations), 0) == self.candidate_answer_overall_number
+        print(tf.gather(tf.shape(self.candidate_answer_representations), 0))
+        print(self.candidate_answer_overall_number)
+        self.add_variables()
+        #assert tf.gather(tf.shape(self.candidate_answer_representations), 0) == self.candidate_answer_overall_number
         self.loss = self.get_loss(self.candidate_answer_representations, self.correct_answer_idx)
         self.train_op = self.add_training_op()
 
@@ -66,7 +69,7 @@ class ccrc_model(object):
                                                                                          sentence_attentioned_hidden_states)
             candidates_representations = tf.expand_dims(candidates_representations, 0)
             sentences_candidates_representations = tf.concat(
-                [sentences_candidates_representations, candidates_representations])
+                [sentences_candidates_representations, candidates_representations],axis=0)
             idx_var = tf.add(idx_var, 1) #increase 1
             return sentences_candidates_representations, idx_var
 
@@ -209,7 +212,7 @@ class ccrc_model(object):
             scores = tf.matmul(predictions, softmax_w) + softmax_b
             scores = tf.squeeze(scores)  # [candidate_answer_num]
             scores = tf.expand_dims(scores, 0)  # [1, candidate_answer_num]
-            truth = tf.onehot(answer, tf.gather(tf.shape(predictions), 0))
+            truth = tf.one_hot(answer, tf.gather(tf.shape(predictions), 0))
             truth = tf.expand_dims(truth, 0)
             cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=scores, labels=truth)
             cross_entropy = tf.squeeze(cross_entropy)
