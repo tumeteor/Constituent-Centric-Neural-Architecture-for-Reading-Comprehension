@@ -195,6 +195,7 @@ class ccrc_model(object):
                 self.candidate_answers: candidate_answers,
                 self.candidate_answer_overall_number: candidate_answers_number
             }
+            logging.warn('candidate_answers shape: {}'.format(np.array(candidate_answers).shape))
             fetches = [self.loss, self.train_op]
             curloss, curtrain = sess.run(fetches, feed_dict=feed)
             losses.append(curloss)

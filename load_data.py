@@ -374,10 +374,10 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list):
                     else:
                         correct_answer_idx = overall_idx
 
-            # need to do some padding here
-            # assume max number of constituents = 200
-            for p in range (ncons, 200):
-                cur_candidate_answer.append(([0]))
+        # need to do some padding here
+        # assume max number of constituents = 200
+        for p in range (ncons, 200):
+            cur_candidate_answer.append(([0]))
 
 
         candidate_answers.append(cur_candidate_answer) # [sentence_num, candidate_number, constituency_idlist]
