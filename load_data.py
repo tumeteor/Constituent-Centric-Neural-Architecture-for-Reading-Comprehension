@@ -45,9 +45,9 @@ def load_squad_data():
         for qindex, data in enumerate(tqdm(train_data)):
             question, answers, context = data[0], data[1], data[2]
             train_qlist.append(question)
-            qout.write(str(qindex) + '：' + question + '\n')
+            qout.write(str(qindex) + ': ' + question + '\n')
             aout.write('\n'.join([str(qindex) + '：' + answer + '\n' for answer in answers]))
-            cout.write(str(qindex) + '：' + context + '\n')
+            cout.write(str(qindex) + ': ' + context + '\n')
     sum_counter = trainCounter + devCounter
     word2idx, embedding = load_embedding()
     with open('vocab.txt', 'w+') as outfile:
@@ -349,27 +349,38 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list):
     sentence_num = len(context_sentence_roots_list)
     overall_idx = -1
     for root in context_sentence_roots_list:
-        overall_idx += 1
+        overall_idx += 1 #sentence idx, loop each sentence
         cur_candidate_answer = []
         constituency_id2span = {}
         leaf_num = 0
-        queue = deque([root])
+        queue = deque([root]) # get all constituents for each sentence (all nodes in each tree)
+
+        ncons = 0
         while queue:
             node = queue.popleft()
             if node.children != []:
+                ncons += 1
                 candidate_answer_overall_number += 1
-                cur_candidate_answer.append([node.idx])
+                # TODO: here list contains only 1 constituents
+                # can be expanded (check paper)
+                cur_candidate_answer.append(([node.idx]))
                 overall_idx += 1
                 queue.extend(node.children)
                 constituency_id2span[node.idx] = node.span
-                if node.get_spans == answer_data:
+                if node.word == answer_data:
                     if correct_answer_idx != -1:
                         logging.warn('{} has duplicated candidate answers'.format(root.span))
                         correct_answer_idx = overall_idx
                     else:
                         correct_answer_idx = overall_idx
 
-        candidate_answers.append(cur_candidate_answer)
+            # need to do some padding here
+            # assume max number of constituents = 200
+            for p in range (ncons, 200):
+                cur_candidate_answer.append(([0]))
+
+
+        candidate_answers.append(cur_candidate_answer) # [sentence_num, candidate_number, constituency_idlist]
 
     return candidate_answers, correct_answer_idx, candidate_answer_overall_number
 
@@ -377,12 +388,12 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list):
 if __name__ == '__main__':
     root = get_tree('Yet the act is still charming here.')
     word2idx, embedding = load_embedding()
-    # leaves,inodes=BFStree(root)
-    # for node in inodes:
-    #    print(len(node.children))
-    b_input, b_treestr, t_input, t_treestr, t_parent = extract_filled_tree(root, word2idx=word2idx)
-    print(b_input)
-    print(b_treestr)
-    print(t_input)
-    print(t_treestr)
-    print(t_parent)
+    leaves,inodes=BFStree(root)
+    for node in inodes:
+       print(len(node.children))
+    # b_input, b_treestr, t_input, t_treestr, t_parent = extract_filled_tree(root, word2idx=word2idx)
+    # print(b_input)
+    # print(b_treestr)
+    # print(t_input)
+    # print(t_treestr)
+    # print(t_parent)

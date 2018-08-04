@@ -23,8 +23,7 @@ class tNode(object):
 
     @staticmethod
     def print_span(root):
-        pass
-        # print(root.span)
+        print(root.span)
 
     def get_left(self):
         left = None

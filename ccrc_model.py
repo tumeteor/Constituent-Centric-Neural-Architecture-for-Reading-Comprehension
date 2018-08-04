@@ -50,7 +50,7 @@ class ccrc_model(object):
         self.candidate_answer_overall_number = tf.placeholder(tf.int32, name='candidate_overall_number')
 
     def get_candidate_answer_representations(self):
-        # return answer: a correnct answer index
+        # return answer: a correct answer index
         # return predictions,
         candidate_answers = self.candidate_answers  # [sentence_num, candidate_number, constituency_idlist]
         print('candidate_ans: {}'.format(candidate_answers))
@@ -129,6 +129,7 @@ class ccrc_model(object):
         #    fwcell=rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
         # with tf.variable_scope('candidate_answer_generation_backward',reuse=True):
         #    bwcell=rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
+        # bidirectional LSTM for the expansion
         chain_outputs, chain_state = tf.nn.bidirectional_dynamic_rnn(self.fwcell, self.bwcell, inputs,
                                                                      sequence_length,
                                                                      initial_state_fw=self._fw_initial_state,
@@ -153,14 +154,14 @@ class ccrc_model(object):
             context_data = data[curidx][2]
             candidate_answers, target_answer_idx, candidate_answers_number = load_data.candidate_answer_generate(
                 answer_data, context_data)
-            # if not has_answer:
-            #     logging.warn('It has no answer in constituency')
-            #     continue
+            if not candidate_answers:
+                 logging.warn('It has no answer in constituency')
+                 continue
             # context_data is the list of root of sentences
             b_input, b_treestr, t_input, t_treestr, t_parent = load_data.extract_filled_tree(question_data,
                                                                                              self.config.maxnodesize,
                                                                                              word2idx=self.config.word2idx)
-            c_inputs, c_treestrs, c_t_inputs, c_t_treestrs, c_t_parents = [], [], [], [], []
+            c_inputs, c_treestrs, c_t_inputs, c_t_treestrs, c_t_parents = [], [], [], [], [], []
             for i in range(len(context_data)):
                 c_input, c_treestr, c_t_input, c_t_treestr, c_t_parent = load_data.extract_filled_tree(context_data[i],
                                                                                                        self.config.maxnodesize,
@@ -170,6 +171,7 @@ class ccrc_model(object):
                 c_t_inputs.append(c_t_input)
                 c_t_treestrs.append(c_t_treestr)
                 c_t_parents.append(c_t_parent)
+            sentence_num = len(context_data)
 
             feed = {
                 self.q_encoding.bp_lstm.input: b_input,
@@ -180,7 +182,7 @@ class ccrc_model(object):
                 self.q_encoding.bp_lstm.dropout: self.config.dropout,
                 self.q_encoding.td_lstm.dropout: self.config.dropout,
 
-                self.c_encoding.c_bp_lstm.sentence_num: self.sentence_num,
+                self.c_encoding.c_bp_lstm.sentence_num: sentence_num,
                 self.c_encoding.c_bp_lstm.input: c_inputs,
                 self.c_encoding.c_bp_lstm.treestr: c_treestrs,
                 self.c_encoding.c_bp_lstm.dropout: self.config.dropout,
