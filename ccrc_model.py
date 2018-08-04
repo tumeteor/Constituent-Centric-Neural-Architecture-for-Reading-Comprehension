@@ -161,7 +161,7 @@ class ccrc_model(object):
             b_input, b_treestr, t_input, t_treestr, t_parent = load_data.extract_filled_tree(question_data,
                                                                                              self.config.maxnodesize,
                                                                                              word2idx=self.config.word2idx)
-            c_inputs, c_treestrs, c_t_inputs, c_t_treestrs, c_t_parents = [], [], [], [], [], []
+            c_inputs, c_treestrs, c_t_inputs, c_t_treestrs, c_t_parents = [], [], [], [], []
             for i in range(len(context_data)):
                 c_input, c_treestr, c_t_input, c_t_treestr, c_t_parent = load_data.extract_filled_tree(context_data[i],
                                                                                                        self.config.maxnodesize,
