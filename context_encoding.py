@@ -143,7 +143,7 @@ class context_bottom_up_lstm(object):
         def _computestates(states, emb_batch, idx_batch):
             cur_states = self.compute_states(emb_batch, idx_batch)
             # [1* node_num ,hidden_value]
-            states = tf.concat([states, cur_states], axis=0)
+            states = tf.concat([states, cur_states], axis=1)
             idx_batch = tf.add(idx_batch, 1)
             return states, emb_batch, idx_batch
 
@@ -292,7 +292,7 @@ class context_top_down_lstm(object):
             tmpinodes_h, tmpinodes_c = self.compute_inodes_states(idx_curbatch)
             tmpnodes_h, tmpnodes_c = self.process_leafs(tmpinodes_h, tmpinodes_c, emb_leaves, idx_curbatch)
             curnodes_h = tf.expand_dims(tmpnodes_h, 0)
-            nodes_h_states = tf.concat([nodes_h_states, curnodes_h], axis=0)
+            nodes_h_states = tf.concat([nodes_h_states, curnodes_h], axis=1)
             idx_curbatch = tf.add(idx_curbatch, 1)
             return idx_curbatch, nodes_h_states
 

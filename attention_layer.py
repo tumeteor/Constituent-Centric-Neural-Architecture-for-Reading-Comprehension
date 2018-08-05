@@ -91,7 +91,7 @@ class attnention_layer(object):
             attention_score = tf.reduce_sum(tf.multiply(q_node_hiddens, context_constituency))
             return tf.to_float(attention_score)
 
-        nodes_attentions = tf.map_fn(_get_score, q_allnodes)
+        nodes_attentions = tf.map_fn(_get_score, q_allnodes,dtype=tf.float32)
         #################neet normalize the attention scores
         q_leaves = tf.range(question_leaves)
 
@@ -101,7 +101,7 @@ class attnention_layer(object):
             attentional_leaves = tf.multiply(hiddens, tf.to_float(attention_score))
             return attentional_leaves
 
-        attentional_representations = tf.to_float(tf.map_fn(_get_attentional_leaves, q_leaves))
+        attentional_representations = tf.to_float(tf.map_fn(_get_attentional_leaves, q_leaves,dtype=tf.float32))
         inodes_num = tf.subtract(q_nodes, question_leaves)
         idx_var = tf.constant(0)
 
