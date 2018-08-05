@@ -143,7 +143,7 @@ class context_bottom_up_lstm(object):
         def _computestates(states, emb_batch, idx_batch):
             cur_states = self.compute_states(emb_batch, idx_batch)
             # [1* node_num ,hidden_value]
-            states = tf.concat([states, cur_states], axis=0)
+            states = tf.concat([states, cur_states], axis=1)
             idx_batch = tf.add(idx_batch, 1)
             return states, emb_batch, idx_batch
 
@@ -158,6 +158,7 @@ class context_bottom_up_lstm(object):
 
     def compute_states(self, emb, idx_batch=0):
         num_leaves = tf.squeeze(tf.gather(self.num_leaves, idx_batch))
+        logging.warn("num_leaves: {}".format(num_leaves))
         n_inodes = tf.gather(self.n_inodes, idx_batch)
         embx = tf.gather(tf.gather(emb, idx_batch), tf.range(num_leaves))
         treestr = tf.gather(self.treestr, idx_batch)
