@@ -368,7 +368,7 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list):
                 queue.extend(node.children)
                 constituency_id2span[node.idx] = node.span
                 logging.warn("node span: {}".format(node.span))
-                logging.warn("node id: {}").format(node.id)
+                logging.warn("node id: {}".format(node.id))
                 logging.warn("answer: {}".format(answer_data))
                 if node.word == answer_data:
                     logging.warn("found answer: {}".format(node.word))
