@@ -293,7 +293,7 @@ class context_top_down_lstm(object):
             tmpinodes_h, tmpinodes_c = self.compute_inodes_states(idx_curbatch)
             tmpnodes_h, tmpnodes_c = self.process_leafs(tmpinodes_h, tmpinodes_c, emb_leaves, idx_curbatch)
             curnodes_h = tf.expand_dims(tmpnodes_h, 0)
-            nodes_h_states = tf.concat([nodes_h_states, curnodes_h], axis=0)
+            nodes_h_states = tf.concat([nodes_h_states, curnodes_h], axis=1)
             idx_curbatch = tf.add(idx_curbatch, 1)
             return idx_curbatch, nodes_h_states
 

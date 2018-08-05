@@ -53,14 +53,14 @@ def train(restore=False):
     train = data['train']
     logging.warn('the length of train data:{}'.format(len(train)))
     model = ccrc_model.ccrc_model(config)
-    with tf.Session(graph=model.graph, config=tf.ConfigProto(log_device_placement=True)) as sess:
-        #session_conf.gpu_options.allow_growth = True
+    with tf.Session(graph=model.graph, config=tf.ConfigProto(allow_soft_placement = True,log_device_placement=True)) as sess:
+       
         print("start training")
         sess.run(tf.global_variables_initializer())
-        saver = tf.train.Saver()
+        #saver = tf.train.Saver()
 
         start_time = time.time()
-        if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
+        #if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
         loss = model.train(train, sess)
         print('average loss:{}'.format(loss))
 
