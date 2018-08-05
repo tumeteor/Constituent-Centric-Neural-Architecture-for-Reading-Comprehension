@@ -24,6 +24,7 @@ class ccrc_model(object):
                 self.c_encoding = context_encoding(config)
                 self.config = config
                 self.sentence_num = self.c_encoding.sentence_num
+
                 ##to do list
                 self.att_layer = attnention_layer(config, self.q_encoding, self.c_encoding)
                 self.scope_index = 0

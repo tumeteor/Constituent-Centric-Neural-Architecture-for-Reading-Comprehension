@@ -9,6 +9,7 @@ import time
 import load_data
 import sys
 import logging
+from tensorflow.python import debug as tf_debug
 
 
 class Config(object):
@@ -16,7 +17,7 @@ class Config(object):
     emb_dim = 300  # 300d glove embedding
     hidden_dim = 150
     degree = 2
-    num_epochs = 1
+    num_epochs = 10
     early_stopping = 2
     dropout = 0.5
     lr = 0.05
@@ -57,6 +58,8 @@ def train(restore=False):
        
         print("start training")
         sess.run(tf.global_variables_initializer())
+        sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+
         saver = tf.train.Saver()
 
         start_time = time.time()
