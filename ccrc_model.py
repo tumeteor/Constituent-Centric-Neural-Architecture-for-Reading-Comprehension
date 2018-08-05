@@ -36,11 +36,12 @@ class ccrc_model(object):
                 self._bw_initial_state = self.bwcell.zero_state(1, dtype=tf.float32)
                 self.add_placeholders()
                 self.candidate_answer_representations = self.get_candidate_answer_representations()
-                print(tf.gather(tf.shape(self.candidate_answer_representations), 0))
-                print(self.candidate_answer_overall_number)
+
                 self.add_variables()
+                print("calculate loss: ")
                 # assert tf.gather(tf.shape(self.candidate_answer_representations), 0) == self.candidate_answer_overall_number
                 self.loss = self.get_loss(self.candidate_answer_representations, self.correct_answer_idx)
+                print("loss: {}".format(self.loss))
                 self.train_op = self.add_training_op()
 
     def add_placeholders(self):
