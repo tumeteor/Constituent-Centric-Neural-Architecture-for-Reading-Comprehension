@@ -313,22 +313,22 @@ class bottom_up_lstm(object):
     def process_leafs(self, emb):
         # emb: [num_leaves, emd_dim]
         with tf.variable_scope("btp_Composition", reuse=True):
-            cU = tf.get_variable("cU", [self.emb_dim, 2 * self.hidden_dim])
-            cb = tf.get_variable("cb", [4 * self.hidden_dim])
-            b = tf.slice(cb, [0], [2 * self.hidden_dim])
+            cU = tf.get_variable("cU", [self.emb_dim, 3 * self.hidden_dim])
+            cb = tf.get_variable("cb", [5 * self.hidden_dim])
+            b = tf.slice(cb, [0], [3 * self.hidden_dim])
 
             # x [emb_dim]
             def _recurseleaf(x):
-                # [1, emb_dim], [emb_dim, 2*self.hidden_dim]
                 concat_uo = tf.matmul(tf.expand_dims(x, 0), cU) + b
-
-                # [1*hidden_dim] [1*hidden_dim]
-                u, o = tf.split(axis=1, num_or_size_splits=2, value=concat_uo)
+                i, o, u = tf.split(1, 3, concat_uo)
+                i = tf.nn.sigmoid(i)
                 o = tf.nn.sigmoid(o)
                 u = tf.nn.tanh(u)
-                c = u  # tf.squeeze(u)
+
+                c = i * u
                 h = o * tf.nn.tanh(c)
-                hc = tf.concat(axis=1, values=[h, c])
+
+                hc = tf.concat(1, [h, c])
                 hc = tf.squeeze(hc)
                 return hc
         hc = tf.map_fn(_recurseleaf, emb)
