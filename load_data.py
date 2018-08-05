@@ -143,7 +143,7 @@ def prepro_each(args, data_type):
                     answers.append(answer_text)
                 for word in qi:
                     word_counter[word] += 1
-                retdata.append([qi, answers, context])
+                retdata.append([q, answers, context])
     # print(retdata[-1])
     return retdata, word_counter
 
