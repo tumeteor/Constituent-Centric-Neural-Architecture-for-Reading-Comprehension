@@ -151,10 +151,10 @@ class ccrc_model(object):
         losses = []
         for curidx in range(len(data)):
             question_data = data[curidx][0]
-            answer_data = data[curidx][1][0]  # a word idx list
+            answer_data = data[curidx][1]  # a word idx list
             context_data = data[curidx][2]
             candidate_answers, target_answer_idx, candidate_answers_number = load_data.candidate_answer_generate(
-                answer_data, context_data)
+                answer_data, context_data, self.config.word2idx)
             if not candidate_answers:
                  logging.warn('It has no answer in constituency')
                  continue

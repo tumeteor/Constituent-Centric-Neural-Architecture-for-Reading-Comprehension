@@ -340,7 +340,7 @@ def get_max_len_data(data):
     dev_data = data['dev']
 
 
-def candidate_answer_generate(answer_data, context_sentence_roots_list):
+def candidate_answer_generate(answer_data, context_sentence_roots_list,word2idx):
     # candidate_answers: sentence_num * candidate_number * constituency_num, each is a constituency id list(reversed BFS order)
     # correct_answer_idx
     candidate_answers = []
@@ -370,9 +370,9 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list):
                 logging.warn("node span: {}".format(node.span))
                 logging.warn("node id: {}".format(node.idx))
                 logging.warn("node tid: {}".format(node.tidx))
-                logging.warn("node word: {}".format(node.word))
+                logging.warn("node get wordidx: {}".format(get_word_idx(node.span,word2idx=word2idx)))
                 logging.warn("answer: {}".format(answer_data))
-                if node.id == answer_data:
+                if get_word_idx(node.span,word2idx=word2idx) == answer_data:
                     logging.warn("found answer: {}".format(node.word))
                     if correct_answer_idx != -1:
                         logging.warn('{} has duplicated candidate answers'.format(root.span))
