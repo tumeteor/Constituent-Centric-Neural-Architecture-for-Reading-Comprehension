@@ -174,24 +174,49 @@ class top_down_lstm(object):
         inode_c = tf.to_float(tf.identity(root_cell))
         idx_var = tf.constant(1)
         with tf.variable_scope('td_Composition', reuse=True):
-            cW = tf.get_variable('cW', [self.hidden_dim + self.emb_dim, 4 * self.hidden_dim])
-            cW, _ = tf.split(value=cW, num_or_size_splits=[self.hidden_dim, self.emb_dim], axis=0)
-            cb = tf.get_variable('cb', [4 * self.hidden_dim])
-            bu, bo, bi, bf = tf.split(axis=0, num_or_size_splits=4, value=cb)
+            cWl = tf.get_variable("cWl", [self.hidden_dim, self.degree * 2 * self.hidden_dim])
+            cWr = tf.get_variable("cWr", [self.hidden_dim, self.degree * 2 * self.hidden_dim])
+            # cW = tf.get_variable("cW", [self.degree * self.hidden_dim, (self.degree + 3) * self.hidden_dim])
+            cb = tf.get_variable("cb", [5 * self.hidden_dim])
+            bu, bo, bi, bfl, bfr = tf.split(axis=0, num_or_size_splits=5, value=cb)
 
             def _recurrence(node_h, node_c, idx_var):
-                node_info = tf.gather(t_treestr, idx_var)  # get t_idx, the index of parent
+                node_info = tf.gather(t_treestr, idx_var)
+                # node_info shape [2, ]
                 parent_h = tf.gather(node_h, node_info)
                 parent_c = tf.gather(node_c, node_info)
+                # flat_ = tf.reshape(child_h, [-1])
+                # 1-D vector
+                # [1* hidden_dim
+                # tmp = tf.matmul(tf.expand_dims(flat_, 0), cW)
+                # u, o, i, fl, fr = tf.split(axis=1, num_or_size_splits=5, value=tmp)
+                # i = tf.nn.sigmoid(i + bi)
+                # o = tf.nn.sigmoid(o + bo)
+                # u = tf.nn.tanh(u + bu)
+                # fl = tf.nn.sigmoid(fl + bf)
+                # fr = tf.nn.sigmoid(fr + bf)
+                #
+                # f = tf.concat(axis=0, values=[fl, fr])
+                #
+                # c = i * u + tf.reduce_sum(f * child_c, [0])
+                #
+                # h = o * tf.nn.tanh(c)
+                parent_hl, parent_hr = tf.split(0, 2, parent_h)
+                parent_cl, parent_cr = tf.split(0, 2, parent_c)
 
-                flat_ = tf.reshape(parent_h, [-1])
-                tmp = tf.matmul(tf.expand_dims(flat_, 0), cW)
-                u, o, i, f = tf.split(axis=1, num_or_size_splits=4, value=tmp)
-                i = tf.nn.sigmoid(i + bi)
-                o = tf.nn.sigmoid(o + bo)
-                u = tf.nn.sigmoid(u + bu)
-                f = tf.nn.sigmoid(f + bf)
-                c = i * u + tf.reduce_sum(f * parent_c, [0])
+                tmpl = tf.matmul(parent_hl, cWl)
+                tmpr = tf.matmul(parent_hr, cWr)
+                ul, ol, il, fl = tf.split(1, 4, tmpl)
+                ur, ori, ir, fr = tf.split(1, 4, tmpr)
+
+                i = tf.nn.sigmoid(il + ir + bi)
+                o = tf.nn.sigmoid(ol + ori + bo)
+                u = tf.nn.tanh(ul + ur + bu)
+                fl = tf.nn.sigmoid(fl + bfl)
+                fr = tf.nn.sigmoid(fr + bfr)
+
+                # f = tf.concat(0, [fl, fr])
+                c = i * u + fl * parent_cl + fr * parent_cr
                 h = o * tf.nn.tanh(c)
                 node_h = tf.concat(axis=0, values=[node_h, h])
                 node_c = tf.concat(axis=0, values=[node_c, c])
@@ -321,30 +346,49 @@ class bottom_up_lstm(object):
         nodes_c = tf.to_float(tf.identity(leaf_c))
         idx_var = tf.constant(0)  # tf.Variable(0,trainable=False)
         with tf.variable_scope("btp_Composition", reuse=True):
-            cW = tf.get_variable("cW", [self.degree * self.hidden_dim, (self.degree + 3) * self.hidden_dim])
-            cb = tf.get_variable("cb", [4 * self.hidden_dim])
-            bu, bo, bi, bf = tf.split(axis=0, num_or_size_splits=4, value=cb)
+            cWl = tf.get_variable("cWl", [self.hidden_dim, self.degree * 2 * self.hidden_dim])
+            cWr = tf.get_variable("cWr", [self.hidden_dim, self.degree * 2 * self.hidden_dim])
+            #cW = tf.get_variable("cW", [self.degree * self.hidden_dim, (self.degree + 3) * self.hidden_dim])
+            cb = tf.get_variable("cb", [5 * self.hidden_dim])
+            bu, bo, bi, bfl, bfr = tf.split(axis=0, num_or_size_splits=5, value=cb)
 
             def _recurrence(node_h, node_c, idx_var):
                 node_info = tf.gather(treestr, idx_var)
                 # node_info shape [2, ]
                 child_h = tf.gather(node_h, node_info)
                 child_c = tf.gather(node_c, node_info)
-                flat_ = tf.reshape(child_h, [-1])
+                #flat_ = tf.reshape(child_h, [-1])
                 # 1-D vector
                 # [1* hidden_dim
-                tmp = tf.matmul(tf.expand_dims(flat_, 0), cW)
-                u, o, i, fl, fr = tf.split(axis=1, num_or_size_splits=5, value=tmp)
-                i = tf.nn.sigmoid(i + bi)
-                o = tf.nn.sigmoid(o + bo)
-                u = tf.nn.tanh(u + bu)
-                fl = tf.nn.sigmoid(fl + bf)
-                fr = tf.nn.sigmoid(fr + bf)
+                # tmp = tf.matmul(tf.expand_dims(flat_, 0), cW)
+                # u, o, i, fl, fr = tf.split(axis=1, num_or_size_splits=5, value=tmp)
+                # i = tf.nn.sigmoid(i + bi)
+                # o = tf.nn.sigmoid(o + bo)
+                # u = tf.nn.tanh(u + bu)
+                # fl = tf.nn.sigmoid(fl + bf)
+                # fr = tf.nn.sigmoid(fr + bf)
+                #
+                # f = tf.concat(axis=0, values=[fl, fr])
+                #
+                # c = i * u + tf.reduce_sum(f * child_c, [0])
+                #
+                # h = o * tf.nn.tanh(c)
+                child_hl, child_hr = tf.split(0, 2, child_h)
+                child_cl, child_cr = tf.split(0, 2, child_c)
 
-                f = tf.concat(axis=0, values=[fl, fr])
+                tmpl = tf.matmul(child_hl, cWl)
+                tmpr = tf.matmul(child_hr, cWr)
+                ul, ol, il, fl = tf.split(1, 4, tmpl)
+                ur, ori, ir, fr = tf.split(1, 4, tmpr)
 
-                c = i * u + tf.reduce_sum(f * child_c, [0])
+                i = tf.nn.sigmoid(il + ir + bi)
+                o = tf.nn.sigmoid(ol + ori + bo)
+                u = tf.nn.tanh(ul + ur + bu)
+                fl = tf.nn.sigmoid(fl + bfl)
+                fr = tf.nn.sigmoid(fr + bfr)
 
+                # f = tf.concat(0, [fl, fr])
+                c = i * u + fl * child_cl + fr * child_cr
                 h = o * tf.nn.tanh(c)
                 node_h = tf.concat(axis=0, values=[node_h, h])
                 node_c = tf.concat(axis=0, values=[node_c, c])
