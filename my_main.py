@@ -54,8 +54,9 @@ def train(restore=False):
     train = data['train']
     logging.warn('the length of train data:{}'.format(len(train)))
     model = ccrc_model.ccrc_model(config)
-    with tf.Session(graph=model.graph, graph_options=tf.GraphOptions(
-  optimizer_options=tf.OptimizerOptions(opt_level=tf.OptimizerOptions.L0)), config=tf.ConfigProto(allow_soft_placement = True,log_device_placement=True)) as sess:
+    with tf.Session(graph=model.graph, config=tf.ConfigProto(allow_soft_placement = True,
+                                                             log_device_placement=True,
+                                                             optimizer_options=tf.OptimizerOptions(opt_level=tf.OptimizerOptions.L0))) as sess:
        
         print("start training")
         sess.run(tf.global_variables_initializer())
