@@ -230,8 +230,10 @@ class ccrc_model(object):
             return cross_entropy
 
     def add_training_op(self):
+        logging.warn("train optimize")
         opt = tf.train.AdagradOptimizer(self.config.lr)
         train_op = opt.minimize(self.loss)
+        logging.warn("done train optimize")
         return train_op
 
 

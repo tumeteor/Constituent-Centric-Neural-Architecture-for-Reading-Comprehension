@@ -367,13 +367,11 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list,word2idx)
                 overall_idx += 1
                 queue.extend(node.children)
                 constituency_id2span[node.idx] = node.span
-                logging.warn("node span: {}".format(node.span))
-                logging.warn("node id: {}".format(node.idx))
-                logging.warn("node tid: {}".format(node.tidx))
+
                 logging.warn("node get wordidx: {}".format(get_word_idx(node.span,word2idx=word2idx)))
                 logging.warn("answer: {}".format(answer_data))
                 if get_word_idx(node.span,word2idx=word2idx) == answer_data:
-                    logging.warn("found answer: {}".format(node.word))
+                    logging.warn("found answer: {}".format(answer_data))
                     if correct_answer_idx != -1:
                         logging.warn('{} has duplicated candidate answers'.format(root.span))
                         correct_answer_idx = overall_idx
