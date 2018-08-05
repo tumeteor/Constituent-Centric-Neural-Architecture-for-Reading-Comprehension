@@ -38,10 +38,10 @@ class ccrc_model(object):
                 self.candidate_answer_representations = self.get_candidate_answer_representations()
 
                 self.add_variables()
-                print("calculate loss: ")
+                logging.warn("calculate loss: ")
                 # assert tf.gather(tf.shape(self.candidate_answer_representations), 0) == self.candidate_answer_overall_number
                 self.loss = self.get_loss(self.candidate_answer_representations, self.correct_answer_idx)
-                print("loss: {}".format(self.loss))
+                logging.warn("loss: {}".format(self.loss))
                 self.train_op = self.add_training_op()
 
     def add_placeholders(self):
