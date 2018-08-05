@@ -123,9 +123,9 @@ def prepro_each(args, data_type):
     # lower_word_counter=Counter()
     retdata = []
     # remove the slice operation to get the complete dateset
-    for ai, article in enumerate(tqdm(source_data['data'][0:1])):
+    for ai, article in enumerate(tqdm(source_data['data'][0:5])):
         # remove the slice operation to get the complete dataset
-        for pi, para in enumerate(article['paragraphs'][0:1]):
+        for pi, para in enumerate(article['paragraphs'][0:5]):
             context = para['context'].replace("''", '" ').replace("``", '" ')
             xi = list(map(word_tokenize, nltk.sent_tokenize(context)))
             xi = [process_tokens(tokens) for tokens in xi]
@@ -143,7 +143,7 @@ def prepro_each(args, data_type):
                     answers.append(answer_text)
                 for word in qi:
                     word_counter[word] += 1
-                retdata.append([q, answers, context])
+                retdata.append([qi, answers, context])
     # print(retdata[-1])
     return retdata, word_counter
 
@@ -242,7 +242,7 @@ def get_tree(sentence):
     return root
 
 
-def extract_filled_tree(cur_data, fillnum=200, word2idx=None):
+def extract_filled_tree(cur_data, fillnum=50, word2idx=None):
     # cur_data is a treeroot
     dim2 = fillnum
     # dim1: batch_size
@@ -380,7 +380,7 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list,word2idx)
 
         # need to do some padding here
         # assume max number of constituents = 200
-        for p in range (ncons, 200):
+        for p in range (ncons, 50):
             cur_candidate_answer.append(([0]))
 
 

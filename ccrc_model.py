@@ -196,6 +196,8 @@ class ccrc_model(object):
                 self.candidate_answers: candidate_answers,
                 self.candidate_answer_overall_number: candidate_answers_number
             }
+            logging.warn("question: {}".format(question_data))
+            logging.warn("context: {}".format(context_data[0]))
             logging.warn('candidate_answers shape: {}'.format(np.array(candidate_answers).shape))
             fetches = [self.loss, self.train_op, self.candidate_answer_representations, self.correct_answer_idx]
             curloss, _, _, _ = sess.run(fetches, feed_dict=feed)
