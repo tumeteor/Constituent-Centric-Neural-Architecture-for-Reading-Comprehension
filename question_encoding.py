@@ -299,12 +299,15 @@ class bottom_up_lstm(object):
                                regularizer=
                                tf.contrib.layers.l2_regularizer(self.config.reg
                                                                 )):
-            cU = tf.get_variable("cU", [self.emb_dim, 2 * self.hidden_dim],
+            cU = tf.get_variable("cU", [self.emb_dim, 3 * self.hidden_dim],
                                  initializer=tf.random_uniform_initializer(-self.calc_wt_init(), self.calc_wt_init()))
-            cW = tf.get_variable("cW", [self.degree * self.hidden_dim, (self.degree + 3) * self.hidden_dim],
-                                 initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),
-                                                                           self.calc_wt_init(self.hidden_dim)))
-            cb = tf.get_variable("cb", [4 * self.hidden_dim], initializer=tf.constant_initializer(0.0),
+            cWl = tf.get_variable("cWl", [self.hidden_dim, self.degree * 2 * self.hidden_dim],
+                                  initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),
+                                                                            self.calc_wt_init(self.hidden_dim)))
+            cWr = tf.get_variable("cWr", [self.hidden_dim, self.degree * 2 * self.hidden_dim],
+                                  initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),
+                                                                            self.calc_wt_init(self.hidden_dim)))
+            cb = tf.get_variable("cb", [5 * self.hidden_dim], initializer=tf.constant_initializer(0.0),
                                  regularizer=tf.contrib.layers.l2_regularizer(0.0))
 
     def process_leafs(self, emb):
