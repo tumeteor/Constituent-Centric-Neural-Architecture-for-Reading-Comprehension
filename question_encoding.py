@@ -328,7 +328,7 @@ class bottom_up_lstm(object):
                 c = i * u
                 h = o * tf.nn.tanh(c)
 
-                hc = tf.concat(1, [h, c])
+                hc = tf.concat(axis=1, values=[h, c])
                 hc = tf.squeeze(hc)
                 return hc
         hc = tf.map_fn(_recurseleaf, emb)
