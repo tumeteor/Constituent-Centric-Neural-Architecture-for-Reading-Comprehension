@@ -229,7 +229,7 @@ class ccrc_model(object):
             return cross_entropy
 
     def add_training_op(self):
-        opt = tf.train.AdagradOptimizer(self.config.lr)
+        opt = tf.train.AdamOptimizer(self.config.lr)
         train_op = opt.minimize(self.loss)
         return train_op
 
