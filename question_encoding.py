@@ -320,7 +320,7 @@ class bottom_up_lstm(object):
             # x [emb_dim]
             def _recurseleaf(x):
                 concat_uo = tf.matmul(tf.expand_dims(x, 0), cU) + b
-                i, o, u = tf.split(1, 3, concat_uo)
+                i, o, u = tf.split(axis=1, num_or_size_splits=3, value=concat_uo)
                 i = tf.nn.sigmoid(i)
                 o = tf.nn.sigmoid(o)
                 u = tf.nn.tanh(u)
@@ -376,13 +376,13 @@ class bottom_up_lstm(object):
                 # c = i * u + tf.reduce_sum(f * child_c, [0])
                 #
                 # h = o * tf.nn.tanh(c)
-                child_hl, child_hr = tf.split(0, 2, child_h)
-                child_cl, child_cr = tf.split(0, 2, child_c)
+                child_hl, child_hr = tf.split(axis=0, num_or_size_splits=2, value=child_h)
+                child_cl, child_cr = tf.split(axis=0, num_or_size_splits=2, value=child_c)
 
                 tmpl = tf.matmul(child_hl, cWl)
                 tmpr = tf.matmul(child_hr, cWr)
-                ul, ol, il, fl = tf.split(1, 4, tmpl)
-                ur, ori, ir, fr = tf.split(1, 4, tmpr)
+                ul, ol, il, fl = tf.split(axis=1, num_or_size_splits=4, value=tmpl)
+                ur, ori, ir, fr = tf.split(axis=1, num_or_size_splits=4, value=tmpr)
 
                 i = tf.nn.sigmoid(il + ir + bi)
                 o = tf.nn.sigmoid(ol + ori + bo)
