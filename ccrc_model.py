@@ -38,7 +38,6 @@ class ccrc_model(object):
                 self.candidate_answer_representations = self.get_candidate_answer_representations()
 
                 self.add_variables()
-                logging.warn("calculate loss: ")
                 # assert tf.gather(tf.shape(self.candidate_answer_representations), 0) == self.candidate_answer_overall_number
                 self.loss = self.get_loss(self.candidate_answer_representations, self.correct_answer_idx)
                 logging.warn("loss: {}".format(self.loss))
@@ -197,8 +196,8 @@ class ccrc_model(object):
                 self.candidate_answer_overall_number: candidate_answers_number
             }
             logging.warn('candidate_answers shape: {}'.format(np.array(candidate_answers).shape))
-            fetches = [self.loss, self.train_op]
-            curloss, curtrain = sess.run(fetches, feed_dict=feed)
+            fetches = [self.loss, self.train_op, self.candidate_answer_representations, self.correct_answer_idx]
+            curloss, _, _, _ = sess.run(fetches, feed_dict=feed)
             losses.append(curloss)
             logging.warn('curidx:{}'.format(curidx))
             logging.warn('curl loss:{}'.format(curloss))
@@ -230,10 +229,8 @@ class ccrc_model(object):
             return cross_entropy
 
     def add_training_op(self):
-        logging.warn("train optimize")
         opt = tf.train.AdagradOptimizer(self.config.lr)
         train_op = opt.minimize(self.loss)
-        logging.warn("done train optimize")
         return train_op
 
 
