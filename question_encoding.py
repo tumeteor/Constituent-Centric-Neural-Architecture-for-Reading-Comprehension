@@ -97,15 +97,11 @@ class top_down_lstm(object):
         with tf.variable_scope('td_Composition', initializer=tf.contrib.layers.xavier_initializer(), \
                                regularizer=tf.contrib.layers.l2_regularizer(self.config.reg)):
             # hidden states and cell states of parents
-            cWl = tf.get_variable("cWl", [self.hidden_dim, self.degree * 2 * self.hidden_dim],
-                                  initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),
-                                                                            self.calc_wt_init(self.hidden_dim)))
-            cWr = tf.get_variable("cWr", [self.hidden_dim, self.degree * 2 * self.hidden_dim],
-                                  initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),
-                                                                            self.calc_wt_init(self.hidden_dim)))
-            cb = tf.get_variable("cb", [5 * self.hidden_dim], initializer=tf.constant_initializer(0.0),
+            cW = tf.get_variable("cW", [self.hidden_dim + self.emb_dim, 4 * self.hidden_dim],
+                                 initializer=tf.random_uniform_initializer(-self.calc_wt_init(self.hidden_dim),
+                                                                           self.calc_wt_init(self.hidden_dim)))
+            cb = tf.get_variable("cb", [4 * self.hidden_dim], initializer=tf.constant_initializer(0.0),
                                  regularizer=tf.contrib.layers.l2_regularizer(0.0))
-
     def calc_wt_init(self, fan_in=300):
         eps = 1.0 / np.sqrt(fan_in)
         return eps
