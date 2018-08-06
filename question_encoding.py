@@ -370,9 +370,12 @@ class bottom_up_lstm(object):
                 node_h = tf.concat(axis=0, values=[node_h, h])
                 node_c = tf.concat(axis=0, values=[node_c, c])
                 idx_var = tf.add(idx_var, 1)
+                logging.warn("loop: {}".format(idx_var))
                 return node_h, node_c, idx_var
 
             # Returns the truth value of (x < y) element-wise
+
+            logging.warn("n_inodes: {}".format(n_inodes))
             loop_cond = lambda a1, b1, idx_var: tf.less(idx_var, n_inodes)
             loop_vars = [nodes_h, nodes_c, idx_var]
             nodes_h, nodes_c, idx_var = tf.while_loop(loop_cond, _recurrence,
