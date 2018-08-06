@@ -153,7 +153,7 @@ class context_bottom_up_lstm(object):
 
         loop_cond = lambda a1, b1, idx_var: tf.less(idx_var, self.sentence_num)
         loop_vars = [states_h, emb_batch, idx_batch]
-        states_h, emb_batch, idx_batch = tf.while_loop(loop_cond, _computestates, loop_vars,
+        states_h, emb_batch, idx_batch = tf.while_loop(loop_cond, _computestates, loop_vars, back_prop=False,
                                                        shape_invariants=[tf.TensorShape([None, None, self.hidden_dim]),
                                                                          emb_batch.get_shape(), idx_batch.get_shape()])
         logging.warn("check7: {}".format(states_h))
@@ -229,7 +229,7 @@ class context_bottom_up_lstm(object):
             loop_cond = lambda a1, b1, idx_var: tf.less(idx_var, n_inodes)
             loop_vars = [nodes_h, nodes_c, idx_var]
             nodes_h, nodes_c, idx_var = tf.while_loop(loop_cond, _recurrence,
-                                                      loop_vars, parallel_iterations=10)
+                                                      loop_vars,  back_prop=False, parallel_iterations=10)
             logging.warn("check8: {}".format(nodes_h))
 
             return tf.expand_dims(nodes_h, 0)
@@ -325,7 +325,7 @@ class context_top_down_lstm(object):
 
         loop_cond = lambda idx, a: tf.less(idx, self.sentence_num)
         loop_vars = [idx_curbatch, nodes_h_states]
-        idx_curbatch, nodes_h_states = tf.while_loop(loop_cond, _tdcomputestate, loop_vars,
+        idx_curbatch, nodes_h_states = tf.while_loop(loop_cond, _tdcomputestate, loop_vars,  back_prop=False,
                                                      shape_invariants=[idx_curbatch.get_shape(),
                                                                        tf.TensorShape([None, None, self.hidden_dim])])
         logging.warn("check4: {}".format(nodes_h_states))
@@ -376,7 +376,7 @@ class context_top_down_lstm(object):
 
             loop_cond = lambda a1, b1, idx_var: tf.less(idx_var, num_leaves)
             loop_vars = [node_h, node_c, idx_var]
-            node_h, node_c, idx_var = tf.while_loop(loop_cond, _recurceleaf, loop_vars,
+            node_h, node_c, idx_var = tf.while_loop(loop_cond, _recurceleaf, loop_vars, back_prop=False,
                                                     shape_invariants=[tf.TensorShape([None, self.hidden_dim]),
                                                                       tf.TensorShape([None, self.hidden_dim]),
                                                                       idx_var.get_shape()])
@@ -424,7 +424,7 @@ class context_top_down_lstm(object):
 
             loop_cond = lambda a1, b1, idx_var: tf.less(idx_var, n_inodes)
             loop_vars = [inode_h, inode_c, idx_var]
-            inode_h, inode_c, idx_var = tf.while_loop(loop_cond, _recurrence, loop_vars,
+            inode_h, inode_c, idx_var = tf.while_loop(loop_cond, _recurrence, loop_vars, back_prop=False,
                                                       shape_invariants=[tf.TensorShape([None, self.hidden_dim]),
                                                                         tf.TensorShape([None, self.hidden_dim]),
                                                                         idx_var.get_shape()])

@@ -34,7 +34,7 @@ class attnention_layer(object):
 
         loop_cond = lambda a1, sentence_id: tf.less(sentence_id, sentence_num)
         loop_vars = [context_attentioned_hiddens, sentence_id]
-        context_attentioned_hiddens, sentence_id = tf.while_loop(loop_cond, _recurse_sentence, loop_vars,
+        context_attentioned_hiddens, sentence_id = tf.while_loop(loop_cond, _recurse_sentence, loop_vars, back_prop=False,
                                                                  shape_invariants=[tf.TensorShape([None, None,
                                                                                                    4 * self.config.hidden_dim]),
                                                                                    sentence_id.get_shape()])
@@ -71,7 +71,7 @@ class attnention_layer(object):
 
         loop_cond = lambda a1, idx: tf.less(idx, sentence_nodes_num)
         loop_vars = [attentioned_hiddens, idx_var]
-        attentioned_hiddens, idx_var = tf.while_loop(loop_cond, _recurse_context_constituency, loop_vars,
+        attentioned_hiddens, idx_var = tf.while_loop(loop_cond, _recurse_context_constituency, loop_vars, back_prop=False,
                                                      shape_invariants=[tf.TensorShape([None, 4 * self.config.hidden_dim]),
                                                                        idx_var.get_shape()])
         logging.warn("check12: {}".format(attentioned_hiddens))
@@ -124,7 +124,7 @@ class attnention_layer(object):
 
         loop_cond = lambda a1, idx: tf.less(idx, inodes_num)
         loop_vars = [attentional_representations, idx_var]
-        attentional_representations, idx_var = tf.while_loop(loop_cond, _recurse_q_nodes, loop_vars,
+        attentional_representations, idx_var = tf.while_loop(loop_cond, _recurse_q_nodes, loop_vars, back_prop=False,
                                                              shape_invariants=[
                                                                  tf.TensorShape([None, 2 * self.config.hidden_dim]),
                                                                  idx_var.get_shape()])
