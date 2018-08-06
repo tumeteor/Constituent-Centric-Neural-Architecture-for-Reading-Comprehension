@@ -18,31 +18,30 @@ class ccrc_model(object):
 
     def __init__(self, config):
         self.graph = tf.Graph()
-        with self.graph.as_default():
-            with tf.device("/gpu:0"):
-                self.q_encoding = question_encoding(config)
-                self.c_encoding = context_encoding(config)
-                self.config = config
-                self.sentence_num = self.c_encoding.sentence_num
+        self.q_encoding = question_encoding(config)
+        self.c_encoding = context_encoding(config)
+        self.config = config
+        self.sentence_num = self.c_encoding.sentence_num
 
-                ##to do list
-                self.att_layer = attnention_layer(config, self.q_encoding, self.c_encoding)
-                self.scope_index = 0
-                # every constituency has a representation [ 4* hidden_dim]
-                with tf.variable_scope('candidate_answer_generation_forward'):
-                    self.fwcell = rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
-                with tf.variable_scope('candidate_answer_generation_backward'):
-                    self.bwcell = rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
-                self._fw_initial_state = self.fwcell.zero_state(1, dtype=tf.float32)
-                self._bw_initial_state = self.bwcell.zero_state(1, dtype=tf.float32)
-                self.add_placeholders()
-                self.candidate_answer_representations = self.get_candidate_answer_representations()
+        ##to do list
+        self.att_layer = attnention_layer(config, self.q_encoding, self.c_encoding)
+        self.scope_index = 0
+        # every constituency has a representation [ 4* hidden_dim]
+        with tf.variable_scope('candidate_answer_generation_forward'):
+            self.fwcell = rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
+        with tf.variable_scope('candidate_answer_generation_backward'):
+            self.bwcell = rnn.BasicLSTMCell(self.config.hidden_dim, activation=tf.nn.tanh)
+        self._fw_initial_state = self.fwcell.zero_state(1, dtype=tf.float32)
+        self._bw_initial_state = self.bwcell.zero_state(1, dtype=tf.float32)
+        self.add_placeholders()
+        self.candidate_answer_representations = self.get_candidate_answer_representations()
 
-                self.add_variables()
-                # assert tf.gather(tf.shape(self.candidate_answer_representations), 0) == self.candidate_answer_overall_number
-                self.loss = self.get_loss(self.candidate_answer_representations, self.correct_answer_idx)
-                logging.warn("loss: {}".format(self.loss))
-                self.train_op = self.add_training_op()
+        self.add_variables()
+        # assert tf.gather(tf.shape(self.candidate_answer_representations), 0) == self.candidate_answer_overall_number
+        self.loss = self.get_loss(self.candidate_answer_representations, self.correct_answer_idx)
+        logging.warn("loss: {}".format(self.loss))
+        self.train_op = self.add_training_op()
+
 
     def add_placeholders(self):
         self.correct_answer_idx = tf.placeholder(tf.int32, name='correct_answer_index')

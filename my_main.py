@@ -51,23 +51,23 @@ def train(restore=False):
     config.maxseqlen = 100
     random.seed(42)
     np.random.seed(42)
+    init = tf.initialize_all_variables()
     train = data['train']
     logging.warn('the length of train data:{}'.format(len(train)))
-    model = ccrc_model.ccrc_model(config)
-    with tf.Session(graph=model.graph, config=tf.ConfigProto(allow_soft_placement = True,
-                                                             log_device_placement=True,
-                                                             graph_options=tf.GraphOptions(optimizer_options=tf.OptimizerOptions(opt_level=tf.OptimizerOptions.L0)))) as sess:
-       
-        print("start training")
-        sess.run(tf.global_variables_initializer())
-        sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+    with tf.Graph().as_default():
+        model = ccrc_model.ccrc_model(config)
+        with tf.Session() as sess:
+            sess.run(init)
+            print("start training")
+            sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 
-        saver = tf.train.Saver()
+            saver = tf.train.Saver()
 
-        start_time = time.time()
-        if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
-        loss = model.train(train, sess)
-        print('average loss:{}'.format(loss))
+            start_time = time.time()
+            if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
+            loss = model.train(train, sess)
+            print('average loss:{}'.format(loss))
+
 
 
 
