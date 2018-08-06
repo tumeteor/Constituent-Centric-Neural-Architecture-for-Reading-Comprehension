@@ -176,7 +176,6 @@ class context_bottom_up_lstm(object):
         nodes_c = tf.to_float(tf.identity(leaf_c))
         idx_var = tf.constant(0)  # tf.Variable(0,trainable=False)
         with tf.variable_scope("btp_Composition", reuse=True):
-            cW = tf.get_variable("cW", [self.degree * self.hidden_dim, (self.degree + 3) * self.hidden_dim])
             cWl = tf.get_variable("cWl", [self.hidden_dim, self.degree * 2 * self.hidden_dim])
             cWr = tf.get_variable("cWr", [self.hidden_dim, self.degree * 2 * self.hidden_dim])
             # cW = tf.get_variable("cW", [self.degree * self.hidden_dim, (self.degree + 3) * self.hidden_dim])
