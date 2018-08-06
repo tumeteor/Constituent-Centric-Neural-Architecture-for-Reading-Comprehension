@@ -51,17 +51,19 @@ def train(restore=False):
     config.maxseqlen = 100
     random.seed(42)
     np.random.seed(42)
-    init = tf.initialize_all_variables()
+
     train = data['train']
     logging.warn('the length of train data:{}'.format(len(train)))
     with tf.Graph().as_default():
+        init = tf.initialize_all_variables()
         model = ccrc_model.ccrc_model(config)
+
+        saver = tf.train.Saver()
         with tf.Session() as sess:
             sess.run(init)
             print("start training")
             sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 
-            saver = tf.train.Saver()
 
             start_time = time.time()
             if restore: saver.restore(sess, './ckpt/tree_rnn_weights')
