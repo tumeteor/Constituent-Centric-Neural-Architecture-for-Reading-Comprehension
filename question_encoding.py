@@ -242,36 +242,24 @@ class bottom_up_lstm(object):
         self.num_leaves = tf.reduce_sum(tf.to_int32(tf.not_equal(self.input, -1)), [0])
 
     def add_embedding(self):
-        # logging.warn('add question embedding')
-        # # embed=np.load('glove{0}_uniform.npy'.format(self.emb_dim))
-        # with tf.variable_scope("Embed", regularizer=None):
-        #     # embedding=tf.get_variable('embedding',[self.num_emb,self.emb_dim],initializer=self.emb_mat, trainable=False)
-        #     # embedding=tf.get_variable('embedding', initializer=self.config.embedding,trainable=False,regularizer=None)
-        #     embedding = tf.get_variable('embedding', shape=[400000, 300], trainable=False, regularizer=None)
-        #     self.embedding_placeholder = tf.placeholder(tf.float32, [400000, 300])
-        #     self.embedding_init = embedding.assign(self.embedding_placeholder)
-        #
-        #     ix = tf.to_int32(tf.not_equal(self.input, -1)) * self.input
-        #     logging.warn('lookup emb_tree')
-        #     emb_tree = tf.nn.embedding_lookup(embedding, ix)
-        #     logging.warn('lookup emb_tree2')
-        #     # emb_tree [maxnodesize, emb_dim]
-        #     # multiplier: [maxnodesize * 1 ]
-        #     emb_tree = emb_tree * (tf.expand_dims(
-        #         tf.to_float(tf.not_equal(self.input, -1)), 1))
-        #     #emb_tree = emb_tree * tf.to_float(tf.not_equal(tf.expand_dims(self.input,2),-1))
-        #     return emb_tree
-
+        logging.warn('add question embedding')
         # embed=np.load('glove{0}_uniform.npy'.format(self.emb_dim))
         with tf.variable_scope("Embed", regularizer=None):
-            embedding = tf.get_variable('embedding', [400000,
-                                                      300]
-                                        , initializer=tf.random_uniform_initializer(-0.05, 0.05), trainable=True,
-                                        regularizer=None)
+            # embedding=tf.get_variable('embedding',[self.num_emb,self.emb_dim],initializer=self.emb_mat, trainable=False)
+            # embedding=tf.get_variable('embedding', initializer=self.config.embedding,trainable=False,regularizer=None)
+            embedding = tf.get_variable('embedding', shape=[400000, 300], trainable=False, regularizer=None)
+            self.embedding_placeholder = tf.placeholder(tf.float32, [400000, 300])
+            self.embedding_init = embedding.assign(self.embedding_placeholder)
+
             ix = tf.to_int32(tf.not_equal(self.input, -1)) * self.input
+            logging.warn('lookup emb_tree')
             emb_tree = tf.nn.embedding_lookup(embedding, ix)
+            logging.warn('lookup emb_tree2')
+            # emb_tree [maxnodesize, emb_dim]
+            # multiplier: [maxnodesize * 1 ]
             emb_tree = emb_tree * (tf.expand_dims(
-                    tf.to_float(tf.not_equal(self.input, -1)), 2))
+                tf.to_float(tf.not_equal(self.input, -1)), 1))
+            #emb_tree = emb_tree * tf.to_float(tf.not_equal(tf.expand_dims(self.input,2),-1))
             return emb_tree
 
     def calc_wt_init(self, fan_in=300):
