@@ -204,13 +204,13 @@ class top_down_lstm(object):
                 # c = i * u + tf.reduce_sum(f * child_c, [0])
                 #
                 # h = o * tf.nn.tanh(c)
-                parent_hl, parent_hr = tf.split(0, 2, parent_h)
-                parent_cl, parent_cr = tf.split(0, 2, parent_c)
+                parent_hl, parent_hr = tf.split(axis=0, num_or_size_splits=2, value=parent_h)
+                parent_cl, parent_cr = tf.split(axis=0, num_or_size_splits=2, value=parent_c)
 
                 tmpl = tf.matmul(parent_hl, cWl)
                 tmpr = tf.matmul(parent_hr, cWr)
-                ul, ol, il, fl = tf.split(1, 4, tmpl)
-                ur, ori, ir, fr = tf.split(1, 4, tmpr)
+                ul, ol, il, fl = tf.split(axis=1, num_or_size_splits=4, value=tmpl)
+                ur, ori, ir, fr = tf.split(axis=1, num_or_size_splits=4, value=tmpr)
 
                 i = tf.nn.sigmoid(il + ir + bi)
                 o = tf.nn.sigmoid(ol + ori + bo)
