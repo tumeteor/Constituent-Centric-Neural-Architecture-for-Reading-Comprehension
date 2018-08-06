@@ -98,7 +98,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     source_dir = '/home/tunguyen/CQA/SQuAD/raw'
     target_dir = 'data/squad'
-    glove_path = '/home/tunguyen/CQA/glove/glove.840B.300d.txt'
+    glove_path = '/home/tunguyen/CQA/glove/glove.6B.300d.txt'
     parser.add_argument('-s', '--source_dir', default=source_dir)
     parser.add_argument('-t', '--target_dir', default=target_dir)
     parser.add_argument('-gs', '--glove_path', default=glove_path)

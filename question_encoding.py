@@ -247,8 +247,8 @@ class bottom_up_lstm(object):
         with tf.variable_scope("Embed", regularizer=None):
             # embedding=tf.get_variable('embedding',[self.num_emb,self.emb_dim],initializer=self.emb_mat, trainable=False)
             # embedding=tf.get_variable('embedding', initializer=self.config.embedding,trainable=False,regularizer=None)
-            embedding = tf.get_variable('embedding', shape=[2196017, 300], trainable=False, regularizer=None)
-            self.embedding_placeholder = tf.placeholder(tf.float32, [2196017, 300])
+            embedding = tf.get_variable('embedding', shape=[400000, 300], trainable=False, regularizer=None)
+            self.embedding_placeholder = tf.placeholder(tf.float32, [400000, 300])
             self.embedding_init = embedding.assign(self.embedding_placeholder)
 
             ix = tf.to_int32(tf.not_equal(self.input, -1)) * self.input
