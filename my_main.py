@@ -55,14 +55,20 @@ def train(restore=False):
     train = data['train']
     logging.warn('the length of train data:{}'.format(len(train)))
     with tf.Graph().as_default():
-        init = tf.initialize_all_variables()
+        #init = tf.initialize_all_variables()
+        
         model = ccrc_model.ccrc_model(config)
+        init_g = tf.global_variables_initializer()
+        init_l = tf.local_variables_initializer()
 
         saver = tf.train.Saver()
-        with tf.Session() as sess:
-            sess.run(init)
+        with tf.Session(config=tf.ConfigProto(
+      allow_soft_placement=True,
+      log_device_placement=True)) as sess:
+            sess.run(init_g)
+            sess.run(init_l)
             print("start training")
-            sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+            #sess = tf_debug.LocalCLIDebugWrapperSession(sess)
 
 
             start_time = time.time()

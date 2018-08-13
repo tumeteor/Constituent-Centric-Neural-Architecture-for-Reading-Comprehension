@@ -12,7 +12,7 @@ from tf_treenode import tNode, processTree
 import random
 import numpy as np
 import logging
-
+import pickle
 
 def load_embedding():
     word2idx = {}
@@ -35,13 +35,23 @@ def load_embedding():
     # print("embedding shape: {}".format(embeddings.shape))
     return word2idx, embeddings
 
+def pickle_squad_data():
+    args = get_args()
+    train_data, trainCounter, dev_data, devCounter = prepro(args)
+    f = open("clinical.pkl", 'wb')
+    save = {
+       "train": train_data,
+       "dev":dev_data
+    }
+    pickle.dump(save, f, protocol=4)
+    f.close() 
 
 def load_squad_data():
     args = get_args()
     train_data, trainCounter, dev_data, devCounter = prepro(args)
     train_qlist = []
     dev_qlist = []
-    with open('train_q.txt', 'w+')as qout, open('train_a.txt', 'w+') as aout, open('train_c.txt', 'w+') as cout:
+    with open('train_q2.txt', 'w+')as qout, open('train_a2.txt', 'w+') as aout, open('train_c2.txt', 'w+') as cout:
         for qindex, data in enumerate(tqdm(train_data)):
             question, answers, context = data[0], data[1], data[2]
             train_qlist.append(question)
@@ -50,32 +60,39 @@ def load_squad_data():
             cout.write(str(qindex) + ': ' + context + '\n')
     sum_counter = trainCounter + devCounter
     word2idx, embedding = load_embedding()
-    with open('vocab.txt', 'w+') as outfile:
+    with open('vocab2.txt', 'w+') as outfile:
         for i in sum_counter:
             outfile.write(i + '\n')
     train_trees = []
     train_answer = []
     train_context_trees = []
+    idx = 0
     for i in tqdm(range(len(train_data))):
-        train_trees.append(get_tree(train_data[i][0]))
-
-        train_answer = get_word_idx(word_tokenize(train_data[i][1][0]),
-                                    word2idx)  # consider that only one correct answer in train dataset
+        extracted_tree = get_tree(train_data[i][0])
+        if extracted_tree is None: continue
+        train_trees.append(extracted_tree)
+        print(train_data[idx][1])
+        print(train_data[idx][1][0])
+        train_answer.append(word_tokenize(train_data[idx][1][0])) # consider that only one correct answer in train dataset
 
         cur_context_trees = []
-        contexts = nltk.sent_tokenize(train_data[i][2]) # tokenize by sentences
+        contexts = nltk.sent_tokenize(train_data[idx][2]) # tokenize by sentences
         for j in range(len(contexts)):
             cur_context_trees.append(get_tree(contexts[j]))
         train_context_trees.append(cur_context_trees)
+        idx += 1
 
-    for i in range(len(train_data)):
+    for i in range(idx):
         train_data[i][0] = train_trees[i]
-        train_data[i][1] = train_answer
+        train_data[i][1] = train_answer[i]
         train_data[i][2] = train_context_trees[i]
     # train_data[#][0] is the root node of one tree
     # train_data[#][1] is the wordidx list of target answer
     # train_data[#][2] is the root list of the sentence
     data = {'train': train_data, 'dev': dev_data}
+    f = open("clinical.pkl", 'wb')
+    pickle.dump(data, f, protocol=4)
+    f.close()
     # print(len(word2idx))
     # print(len(embedding))
     return data, word2idx, embedding
@@ -90,14 +107,14 @@ def get_word_idx(word_list, word2idx):
             idx_list.append(word2idx[word.lower()])
         else:
             logging.warn('no wordidx for answer:{}'.format(word))
-            idx_list.append(word2idx['UNK'])
+            idx_list.append(word2idx['unknown'])
     return idx_list
 
 
 def get_args():
     parser = argparse.ArgumentParser()
-    source_dir = '/home/tunguyen/CQA/SQuAD/raw'
-    target_dir = 'data/squad'
+    source_dir = '/home/tunguyen/CQA/ClinicalTrials/raw'
+    target_dir = 'data/clinical'
     glove_path = '/home/tunguyen/CQA/glove/glove.6B.300d.txt'
     parser.add_argument('-s', '--source_dir', default=source_dir)
     parser.add_argument('-t', '--target_dir', default=target_dir)
@@ -116,6 +133,7 @@ def prepro(args):
 
 def prepro_each(args, data_type):
     source_path = os.path.join(args.source_dir, '{}-v1.1.json'.format(data_type))
+    print(source_path)
     source_data = json.load(open(source_path, 'r'))
     qlist = []
     clist = []
@@ -123,9 +141,9 @@ def prepro_each(args, data_type):
     # lower_word_counter=Counter()
     retdata = []
     # remove the slice operation to get the complete dateset
-    for ai, article in enumerate(tqdm(source_data['data'][0:1])):
+    for ai, article in enumerate(tqdm(source_data['data'])):
         # remove the slice operation to get the complete dataset
-        for pi, para in enumerate(article['paragraphs'][0:1]):
+        for pi, para in enumerate(article['paragraphs']):
             context = para['context'].replace("''", '" ').replace("``", '" ')
             xi = list(map(word_tokenize, nltk.sent_tokenize(context)))
             xi = [process_tokens(tokens) for tokens in xi]
@@ -173,11 +191,11 @@ class Args():
 def constituency_parse(sentence, cp='', tokenize=True):
     classpath = "/home/tunguyen/Constituent-LSTM/lib:/home/tunguyen/Constituent-LSTM/lib/stanford-parser/stanford-parser.jar:/home/tunguyen/Constituent-LSTM/lib/stanford-parser/stanford-parser-3.5.1-models.jar"
     # args=Args()
-    with open('tmp.txt', 'w+') as outfile:
+    with open('tmp2.txt', 'w+') as outfile:
         outfile.write(sentence)
-    tokpath = 'tmp.tok'
-    parentpath = 'tmp.cparents'
-    relpath = 'tmp.rel'
+    tokpath = 'tmp2.tok'
+    parentpath = 'tmp2.cparents'
+    relpath = 'tmp2.rel'
     # cmd=('java -cp {} DependencyParse -tokpath {} -parentpath {} -relpath {} -tokenize -  < {}'.format(args.classpath,tokpath,parentpath, relpath,'tmp.txt'))
     # os.system(cmd)
     cmd = (
@@ -220,19 +238,23 @@ def load_tree(tokfile, parentsfile):
     parents = []
     with open(tokfile) as infile:
         lines = infile.readlines()
-        assert len(lines) == 1
+        if len(lines) != 1: return
+        #assert len(lines) == 1
         sentence = lines[0]
     with open(parentsfile) as infile:
         lines = infile.readlines()
-        assert len(lines) == 1
+        if len(lines) != 1: return
+        #assert len(lines) == 1
         parents = lines[0].strip().split()
     parents = [int(parent) for parent in parents]
     return parse_tree(sentence, parents)
 
 
 def get_tree(sentence):
+    print(sentence)
     constituency_parse(sentence)
-    root = load_tree('tmp.tok', 'tmp.cparents')
+    root = load_tree('tmp2.tok', 'tmp2.cparents')
+    if root is None: return
     postOrder = root.postOrder
     postOrder(root, tNode.get_height, None)
     postOrder(root, tNode.get_numleaves, None)
@@ -242,7 +264,7 @@ def get_tree(sentence):
     return root
 
 
-def extract_filled_tree(cur_data, fillnum=50, word2idx=None):
+def extract_filled_tree(cur_data, fillnum=300, word2idx=None):
     # cur_data is a treeroot
     dim2 = fillnum
     # dim1: batch_size
@@ -390,11 +412,12 @@ def candidate_answer_generate(answer_data, context_sentence_roots_list,word2idx)
 
 
 if __name__ == '__main__':
-    root = get_tree('Yet the act is still charming here.')
-    word2idx, embedding = load_embedding()
-    leaves,inodes=BFStree(root)
-    for node in inodes:
-       print(len(node.children))
+    load_squad_data()
+    #root = get_tree('Yet the act is still charming here.')
+    #word2idx, embedding = load_embedding()
+    #leaves,inodes=BFStree(root)
+    #for node in inodes:
+    #   print(len(node.children))
     # b_input, b_treestr, t_input, t_treestr, t_parent = extract_filled_tree(root, word2idx=word2idx)
     # print(b_input)
     # print(b_treestr)

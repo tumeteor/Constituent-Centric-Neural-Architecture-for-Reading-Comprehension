@@ -35,7 +35,7 @@ class ccrc_model(object):
         self._bw_initial_state = self.bwcell.zero_state(1, dtype=tf.float32)
         self.add_placeholders()
         self.candidate_answer_representations = self.get_candidate_answer_representations()
-
+        
         self.add_variables()
         # assert tf.gather(tf.shape(self.candidate_answer_representations), 0) == self.candidate_answer_overall_number
         self.loss = self.get_loss(self.candidate_answer_representations, self.correct_answer_idx)
@@ -202,7 +202,7 @@ class ccrc_model(object):
             curloss, _, _, _ = sess.run(fetches, feed_dict=feed)
             losses.append(curloss)
             logging.warn('curidx:{}'.format(curidx))
-            logging.warn('curl loss:{}'.format(curloss))
+            print('curl loss:{}'.format(curloss))
         average_loss = np.array(losses).mean()
         return average_loss
 
@@ -217,6 +217,8 @@ class ccrc_model(object):
         # self.learning_rate=tf.maximun(1e-5, tf.train.exponential_devay(config.learning_rate, cinfig.global_step, config.lr_deday_steps, config.))
 
     def get_loss(self, predictions, answer):
+        print("predictions: {}".format(predictions))
+        print("answer: {}".format(answer))
         # predictions: [candidate_answer_num,  2* hidden_dim]
         with tf.variable_scope('projection_layer', reuse=True):
             softmax_w = tf.get_variable('softmax_w')
